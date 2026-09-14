@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Basic Inquiry | The Vancouver Life Drawing Society</title>
+<meta name="description" content="The Vancouver Life Drawing Society. Not-for-profit, volunteer-run life drawing sessions at 1011 Main Street, Vancouver. Everyone is welcome, from beginners to seasoned artists.">
+<link rel="icon" href="assets/logo.png">
+<meta property="og:title" content="Basic Inquiry | The Vancouver Life Drawing Society">
+<meta property="og:description" content="Ten life drawing sessions a week at 1011 Main Street, Vancouver. Everyone is welcome, from beginners to seasoned artists.">
+<meta property="og:image" content="https://lifedrawing.org/assets/studio.jpg">
+<style>
+:root{
+  --bg:#0d0c0c;--bg2:#161515;--bg3:#1f1d1d;--line:#2c2929;
+  --fg:#f4f1ec;--muted:#b3aca3;--faint:#7d766e;
+  --accent:#ff6900;--accent-dark:#d95800;
+  --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --max:1100px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+img{max-width:100%;display:block}
+h1,h2,h3{font-family:var(--serif);font-weight:500;line-height:1.15;margin:0 0 .5em;letter-spacing:-.01em}
+h2{font-size:clamp(1.7rem,3.2vw,2.4rem)}
+h3{font-size:1.25rem;margin-top:1.4em}
+p{margin:0 0 1em}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
+.btn{display:inline-block;background:var(--accent);color:#000;font-weight:600;padding:.75em 1.4em;border-radius:6px;letter-spacing:.01em}
+.btn:hover{background:var(--accent-dark);text-decoration:none;color:#000}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--faint)}
+.btn.ghost:hover{border-color:var(--fg);background:transparent;color:var(--fg)}
+.eyebrow{font-family:var(--sans);font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);margin-bottom:.9em;display:block}
+.muted{color:var(--muted)}
+.small{font-size:.92rem}
+
+/* header */
+header{position:sticky;top:0;z-index:20;background:rgba(13,12,12,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px}
+.brand{display:flex;align-items:center;gap:12px;color:var(--fg)}
+.brand:hover{text-decoration:none}
+.brand img{width:44px;height:44px;border-radius:50%}
+.brand b{font-family:var(--serif);font-weight:500;font-size:1.25rem;display:block;line-height:1.1}
+.brand span{font-size:.78rem;color:var(--muted);display:block}
+.bar .btn{padding:.6em 1.1em;font-size:.92rem;white-space:nowrap}
+@media (max-width:600px){.brand span{display:none}}
+
+/* under construction */
+.notice{background:var(--accent);color:#000;text-align:center;font-size:.92rem;font-weight:600;padding:9px 22px}
+.notice a{color:#000;text-decoration:underline}
+
+/* hero: floating sketch clusters */
+.hero{position:relative;min-height:min(90vh,900px);background:var(--bg);overflow:hidden;isolation:isolate}
+.hero::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(13,12,12,.4) 0%,rgba(13,12,12,0) 22%,rgba(13,12,12,0) 62%,rgba(13,12,12,.85) 100%)}
+.field{position:absolute;left:0;right:0;top:0;bottom:250px;z-index:1}
+.cluster{position:absolute;inset:0;pointer-events:none}
+.sk{position:absolute;left:0;top:0;pointer-events:auto;will-change:transform;display:block}
+.sk img{border-radius:3px;box-shadow:0 12px 32px rgba(0,0,0,.55);display:block}
+.sk.big,.cl-label.big{z-index:5}
+.cl-label{position:absolute;left:0;top:0;pointer-events:auto;will-change:transform;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#fff;color:#111;border-radius:3px;box-shadow:0 12px 32px rgba(0,0,0,.55);text-align:center;font-family:var(--serif);line-height:1.05;}
+.cl-label b{font-weight:500;font-size:2.2em;letter-spacing:-.02em}
+.cl-label span{font-family:var(--sans);font-size:.68em;text-transform:uppercase;letter-spacing:.14em;color:#555;margin-top:.5em}
+.cl-label:hover{text-decoration:none;color:var(--accent)}
+.hero-fg{position:absolute;left:0;right:0;bottom:0;z-index:3;pointer-events:none;padding-bottom:44px;display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap}
+.hero-fg h1{font-size:clamp(2rem,4.2vw,3.2rem);max-width:none;margin-bottom:.25em;text-shadow:0 2px 24px rgba(0,0,0,.6)}
+.hero-fg p{max-width:62ch;color:var(--muted);margin-bottom:0;text-shadow:0 1px 12px rgba(0,0,0,.6)}
+.hero-fg .cta{display:flex;flex-wrap:wrap;gap:12px;padding-bottom:4px}
+.hero-fg .btn,.hero-fg a{pointer-events:auto}
+@media (max-width:700px){.hero{min-height:min(92vh,820px)}.field{bottom:290px}.hero-fg{padding-bottom:32px;gap:16px}}
+
+
+section{padding:56px 0 64px;border-top:1px solid var(--line)}
+.center{text-align:center}
+
+/* calendar: the week strip */
+.week-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+.week-head h2{margin:0}
+.onwalls{color:var(--muted);margin:0 0 22px;font-size:.95rem}
+.onwalls b{color:var(--fg);font-weight:500}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.day{background:var(--bg);padding:14px 12px 18px;min-height:190px}
+.day.today{background:var(--bg2)}
+.day h3{margin:0 0 12px;font-family:var(--sans);font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:600}
+.day h3 b{display:block;font-family:var(--serif);font-size:1.5rem;letter-spacing:0;color:var(--fg);font-weight:500;text-transform:none;line-height:1.1;margin-top:2px}
+.day.today h3{color:var(--accent)}
+.ev{margin:0 0 12px;font-size:.9rem;line-height:1.35}
+.ev time{display:block;color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums;font-size:.82rem}
+.ev.off{color:var(--faint)}.ev.off span{text-decoration:line-through}
+.ev.off time{color:var(--faint)}
+.day .none{color:var(--faint);font-size:.85rem}
+.addcal{margin:18px 0 0;text-align:right}
+@media (max-width:900px){.week{grid-template-columns:repeat(4,1fr)}}
+@media (max-width:640px){.week{grid-template-columns:1fr}.day{min-height:0;display:grid;grid-template-columns:96px 1fr;gap:0 14px}.day h3{grid-row:span 9}.day.empty{padding:10px 12px}}
+
+/* footer */
+footer{background:#000;padding:36px 0 28px;border-top:1px solid var(--line);font-size:.93rem;color:var(--muted)}
+footer a{color:var(--fg)}
+footer .copy{color:var(--faint);margin:0}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#top">
+      <img src="assets/logo.png" alt="Basic Inquiry" width="44" height="44">
+      <div><b>Basic Inquiry</b><span>The Vancouver Life Drawing Society</span></div>
+    </a>
+    <a class="btn" href="https://www.scratchconsortium.com/alain2020/robostrar/">Book now</a>
+  </div>
+</header>
+<div class="notice">This website is under construction. Booking works as always on <a href="https://www.scratchconsortium.com/alain2020/robostrar/">Robostrar</a>.</div>
+
+<main id="top">
+
+<div class="hero" id="hero">
+  <div class="field" id="field"></div>
+  <div class="wrap hero-fg">
+    <div>
+      <h1>Welcome to Basic Inquiry</h1>
+      <p>The Vancouver Life Drawing Society. Not-for-profit, volunteer-run, ten sessions a week. Everyone is welcome, from beginners to seasoned artists!</p>
+    </div>
+  </div>
+</div>
+
+<section id="calendar">
+  <div class="wrap">
+    <div class="week-head"><h2>This week</h2><a class="btn" href="https://www.scratchconsortium.com/alain2020/robostrar/">Book now</a></div>
+    <p class="onwalls" id="onwalls" hidden></p>
+    <div class="week" id="week"></div>
+    <p class="small muted addcal">Add to your calendar: <a href="https://calendar.google.com/calendar/u/0/r?cid=5a146f2ba73b44ac3e3834609ab83e7ffd65d3ccd857a5ac01d7d6e082d3063b%40group.calendar.google.com">Google</a> · <a href="webcal://calendar.google.com/calendar/ical/5a146f2ba73b44ac3e3834609ab83e7ffd65d3ccd857a5ac01d7d6e082d3063b%40group.calendar.google.com/public/basic.ics">Apple / Outlook</a></p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>1011 Main Street, Vancouver, BC V6A 4L4 · 604.681.2855 · <a href="mailto:board@lifedrawing.org">board@lifedrawing.org</a> · <a href="https://www.instagram.com/basicinquiry/">Instagram</a> · <a href="https://www.facebook.com/basicinquiry">Facebook</a></p>
+    <p class="small">We acknowledge at our Studio that we gather on the traditional, ancestral, and unceded territory of the Coast Salish Peoples, including the territories of the xʷməθkʷəy̓əm (Musqueam), Sḵwx̱wú7mesh (Squamish), and səlilwətaɬ (Tsleil-Waututh) Nations.</p>
+    <p class="small copy">© 2026 Basic Inquiry, The Vancouver Life Drawing Society</p>
+  </div>
+</footer>
+
+<script>
+// This week: rolling seven days from today, from assets/events.json (refresh-calendar.py pulls the public Google Calendar).
+(async function(){
+  const wk=document.getElementById('week'); if(!wk) return;
+  let data; try{ data=(await (await fetch('assets/events.json')).json()).events; }catch(e){ wk.innerHTML='<div class="day"><p class="none">The calendar is taking a moment. Sessions are on <a href="https://www.scratchconsortium.com/alain2020/robostrar/">Robostrar</a>.</p></div>'; return; }
+  const now=new Date(), pad=n=>String(n).padStart(2,'0'), iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  const hm=t=>{ const [h,m]=t.split(':').map(Number); return (h%12||12)+(m?':'+pad(m):'')+' '+(h<12?'am':'pm'); };
+  const days=[]; for(let i=0;i<7;i++){ const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i); days.push(d); }
+  const t0=iso(days[0]), t6=iso(days[6]);
+  // all-day events (exhibitions) that overlap the week go on one line above the grid
+  const walls=data.filter(e=>e.allDay&&e.date<=t6&&(e.end||e.date)>=t0&&!e.cancelled);
+  const ow=document.getElementById('onwalls');
+  if(walls.length){ ow.hidden=false; ow.innerHTML='On the walls: '+walls.map(e=>'<b>'+e.title.replace(/\s*\|\s*/g,' · ')+'</b>').join(', '); }
+  wk.innerHTML=days.map((d,i)=>{
+    const k=iso(d), evs=data.filter(e=>!e.allDay&&e.date===k);
+    const lab=i===0?'Today':d.toLocaleDateString('en-CA',{weekday:'long'});
+    const body=evs.length?evs.map(e=>'<p class="ev'+(e.cancelled?' off':'')+'"><time>'+hm(e.start)+(e.until&&e.until>e.start?' – '+hm(e.until):'')+'</time><span>'+e.title+'</span>'+(e.cancelled?' <em>cancelled</em>':'')+'</p>').join(''):'<p class="none">No session</p>';
+    return '<div class="day'+(i===0?' today':'')+(evs.length?'':' empty')+'"><h3>'+lab+'<b>'+d.toLocaleDateString('en-CA',{month:'short',day:'numeric'})+'</b></h3>'+body+'</div>';
+  }).join('');
+})();
+</script>
+<script>
+(async function(){
+  const field=document.getElementById('field'); if(!field) return;
+  let posts; try{ posts=await (await fetch('assets/sketchbook.json')).json(); }catch(e){ return; }
+  posts.sort((a,b)=>b.date.localeCompare(a.date));
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W=field.clientWidth,H=field.clientHeight;
+  const mobile=()=>W<700;
+  const IMG=()=>mobile()?86:92;          // longest image edge, px
+  const R=()=>mobile()?128:188;           // where the date label sits under the attractor
+  const SPACING=()=>mobile()?W*0.9:Math.max(200,W/Math.max(3,Math.round(W/215)));   // ~5-6 clusters across a laptop, no gap when one recycles
+  const G=9e6, DAMP=0.03, SPIN=12, BIG=1.9;
+  // hovering a sketch grows it; the separation force does the rest of the choreography
+  const hover=(p)=>{ p.el.addEventListener('pointerenter',()=>{p.hot=true;p.el.classList.add('big');}); p.el.addEventListener('pointerleave',()=>{p.hot=false;p.el.classList.remove('big');}); };
+  let next=0; const clusters=[];
+
+  // One cluster = one blog post. The post is an attractor; its sketches are movers (Nature of Code, ch. 2).
+  function makeCluster(x){
+    const post=posts[next++%posts.length];
+    const el=document.createElement('div'); el.className='cluster';
+    const href='https://shashrvacai.com/blog/'+post.slug;
+    const parts=post.imgs.map(im=>{
+      const a=document.createElement('a'); a.className='sk'; a.href=href; a.target='_blank'; a.rel='noopener'; a.title=post.title;
+      const img=new Image(); const s=IMG()/Math.max(im.w,im.h); const w=im.w*s,h=im.h*s;
+      img.src=im.src; img.alt=''; img.width=Math.round(w); img.height=Math.round(h); img.decoding='async';
+      a.appendChild(img); el.appendChild(a);
+      const ang=Math.random()*Math.PI*2, r=mobile()?150+Math.random()*220:60+Math.random()*90;
+      const pt={el:a,w,h,rad:Math.hypot(w,h)/2*0.82,x:Math.cos(ang)*r,y:Math.sin(ang)*r,vx:(Math.random()-.5)*60,vy:(Math.random()-.5)*60,rot:(Math.random()-.5)*9,m:0.7+Math.random()*0.8,s:1,hot:false};
+      hover(pt); return pt;
+    });
+    // the date is a card in the same cluster: same physics, so it never overlaps a sketch
+    const label=document.createElement('a'); label.className='cl-label'; label.href=href; label.target='_blank'; label.rel='noopener'; label.title=post.title;
+    const dt=new Date(post.date+'T12:00:00');
+    label.innerHTML='<b>'+dt.getDate()+'</b><span>'+dt.toLocaleDateString('en-CA',{month:'short'})+' '+dt.getFullYear()+'</span>';
+    const lw=IMG()*0.5, lh=IMG()*0.5; label.style.width=lw+'px'; label.style.height=lh+'px'; label.style.fontSize=(lw/6.2)+'px';
+    el.appendChild(label); field.appendChild(el);
+    const lp={el:label,w:lw,h:lh,rad:Math.hypot(lw,lh)/2*0.82,x:0,y:0,vx:0,vy:0,rot:0,m:1.6,s:1,hot:false,pin:true}; hover(lp); parts.push(lp);
+    return {el,parts,x,y0:H*0.55,y:H*0.55,vx:reduce?0:-(mobile()?13:19),phase:Math.random()*6.28,amp:H*0.045};
+  }
+  function seed(){
+    const n=Math.max(1,Math.round(W/SPACING()));
+    for(let i=0;i<=n;i++) clusters.push(makeCluster(W*(i+0.5)/n));   // one extra waits off the right edge so the belt never gaps
+  }
+  seed();
+
+  let last=performance.now(), t=0;
+  function step(now){
+    let dt=Math.min(0.05,(now-last)/1000); last=now; t+=dt;
+    const damp=Math.pow(DAMP,dt);
+    let rightmost=-1e9;
+    for(const c of clusters){
+      c.x+=c.vx*dt; c.y=c.y0+Math.sin(t*0.22+c.phase)*c.amp; rightmost=Math.max(rightmost,c.x);
+      const P=c.parts;
+      for(const p of P){ const ts=p.hot?BIG:1; p.s+=(ts-p.s)*Math.min(1,dt*7); }
+      for(const p of P){
+        // attraction to the post's attractor (F = G m / d^2, distance constrained)
+        const d=Math.hypot(p.x,p.y)||1, dc=Math.min(Math.max(d,70),300), home=mobile()?130:78;
+        let ax,ay;
+        if(p.pin){ ax=-p.x*9; ay=-p.y*9; }   // the date card: a soft spring to the attractor, no gravity, no spin
+        else {
+          let f=G*p.m/(dc*dc); if(d<70) f*=d/70;     // ramp to zero at the centre, no flip-flop
+          ax=-p.x/d*f; ay=-p.y/d*f;
+          if(d>home){ const k=(d-home)*7; ax+=-p.x/d*k; ay+=-p.y/d*k; }   // spring keeps stragglers home
+          ax+=-p.y/d*SPIN; ay+=p.x/d*SPIN;                                 // gentle orbit
+        }
+        // separation from siblings
+        for(const q of P){ if(q===p) continue;
+          const dx=p.x-q.x, dy=p.y-q.y, dd=Math.hypot(dx,dy)||1, min=p.rad*p.s+q.rad*q.s+10;
+          if(dd<min){ const f=(min-dd)*38; ax+=dx/dd*f; ay+=dy/dd*f; }
+        }
+        if(p.hot){ ax=0; ay=0; p.vx*=0.8; p.vy*=0.8; } // the one you are looking at holds still
+        const dm=p.pin?damp*damp:damp;
+        p.vx=(p.vx+ax*dt)*dm; p.vy=(p.vy+ay*dt)*dm;
+        p.x+=p.vx*dt; p.y+=p.vy*dt;
+        p.el.style.transform='translate3d('+(c.x+p.x-p.w/2).toFixed(1)+'px,'+(c.y+p.y-p.h/2).toFixed(1)+'px,0) rotate('+p.rot+'deg) scale('+p.s.toFixed(3)+')';
+      }
+    }
+    // recycle: a cluster that has left on the left comes back on the right as the next post
+    for(let i=0;i<clusters.length;i++){
+      const c=clusters[i];
+      if(c.x<-260){ c.el.remove(); clusters[i]=makeCluster(Math.max(W+200,rightmost+SPACING())); rightmost=clusters[i].x; }
+    }
+    if(!reduce || t<4) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+
+  let rt; addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(()=>{
+    W=field.clientWidth; H=field.clientHeight;
+    for(const c of clusters){ c.y0=H*0.55; c.amp=H*0.045; }
+  },150);});
+})();
+</script>
+</body>
+</html>

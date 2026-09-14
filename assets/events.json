@@ -1,0 +1,959 @@
+{
+"generated": "2026-09-14T00:19-07:00",
+"events": [
+{
+"date": "2026-09-12",
+"end": "2026-10-31",
+"start": null,
+"until": null,
+"allDay": true,
+"title": "Member Art Exhibit | Harvey Chan | Details TBA",
+"cancelled": false
+},
+{
+"date": "2026-09-13",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Long-pose Session",
+"cancelled": false
+},
+{
+"date": "2026-09-13",
+"end": null,
+"start": "14:00",
+"until": "17:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-14",
+"end": null,
+"start": "18:00",
+"until": "09:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-15",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-15",
+"end": null,
+"start": "18:00",
+"until": "21:00",
+"allDay": false,
+"title": "Portrait Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-16",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-17",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-17",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-18",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Long-pose/Multiday session",
+"cancelled": false
+},
+{
+"date": "2026-09-19",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-19",
+"end": null,
+"start": "14:00",
+"until": "16:00",
+"allDay": false,
+"title": "Gallery Open to the Public",
+"cancelled": false
+},
+{
+"date": "2026-09-19",
+"end": null,
+"start": "17:30",
+"until": "20:30",
+"allDay": false,
+"title": "ELP Group 24",
+"cancelled": false
+},
+{
+"date": "2026-09-20",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Long-pose Session",
+"cancelled": false
+},
+{
+"date": "2026-09-20",
+"end": null,
+"start": "14:00",
+"until": "17:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-20",
+"end": null,
+"start": "17:30",
+"until": "20:30",
+"allDay": false,
+"title": "ELP Group 24",
+"cancelled": false
+},
+{
+"date": "2026-09-21",
+"end": null,
+"start": "18:00",
+"until": "09:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-22",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-22",
+"end": null,
+"start": "18:00",
+"until": "21:00",
+"allDay": false,
+"title": "Portrait Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-23",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-24",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-24",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-25",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Long-pose/Multiday session",
+"cancelled": false
+},
+{
+"date": "2026-09-26",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-26",
+"end": null,
+"start": "14:00",
+"until": "16:00",
+"allDay": false,
+"title": "Gallery Open to the Public",
+"cancelled": false
+},
+{
+"date": "2026-09-26",
+"end": null,
+"start": "17:30",
+"until": "20:30",
+"allDay": false,
+"title": "ELP Group 24",
+"cancelled": false
+},
+{
+"date": "2026-09-27",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Long-pose Session",
+"cancelled": false
+},
+{
+"date": "2026-09-27",
+"end": null,
+"start": "14:00",
+"until": "17:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-27",
+"end": null,
+"start": "17:30",
+"until": "20:30",
+"allDay": false,
+"title": "ELP Group 24",
+"cancelled": false
+},
+{
+"date": "2026-09-28",
+"end": null,
+"start": "18:00",
+"until": "09:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-29",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-29",
+"end": null,
+"start": "18:00",
+"until": "21:00",
+"allDay": false,
+"title": "Portrait Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-09-30",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-01",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-01",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-02",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Long-pose/Multiday session",
+"cancelled": false
+},
+{
+"date": "2026-10-03",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-03",
+"end": null,
+"start": "14:00",
+"until": "16:00",
+"allDay": false,
+"title": "Gallery Open to the Public",
+"cancelled": false
+},
+{
+"date": "2026-10-04",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Long-pose Session",
+"cancelled": false
+},
+{
+"date": "2026-10-04",
+"end": null,
+"start": "14:00",
+"until": "17:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-05",
+"end": null,
+"start": "18:00",
+"until": "09:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-06",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-06",
+"end": null,
+"start": "18:00",
+"until": "21:00",
+"allDay": false,
+"title": "Portrait Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-07",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-08",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-08",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-09",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Long-pose/Multiday session",
+"cancelled": false
+},
+{
+"date": "2026-10-10",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-10",
+"end": null,
+"start": "14:00",
+"until": "16:00",
+"allDay": false,
+"title": "Gallery Open to the Public",
+"cancelled": false
+},
+{
+"date": "2026-10-10",
+"end": null,
+"start": "17:30",
+"until": "20:30",
+"allDay": false,
+"title": "ELP Group 25",
+"cancelled": false
+},
+{
+"date": "2026-10-11",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Long-pose Session",
+"cancelled": false
+},
+{
+"date": "2026-10-11",
+"end": null,
+"start": "14:00",
+"until": "17:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-11",
+"end": null,
+"start": "17:30",
+"until": "20:30",
+"allDay": false,
+"title": "ELP Group 25",
+"cancelled": false
+},
+{
+"date": "2026-10-12",
+"end": null,
+"start": "18:00",
+"until": "09:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-13",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-13",
+"end": null,
+"start": "18:00",
+"until": "21:00",
+"allDay": false,
+"title": "Portrait Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-14",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-15",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-15",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-16",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Long-pose/Multiday session",
+"cancelled": false
+},
+{
+"date": "2026-10-17",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-17",
+"end": null,
+"start": "14:00",
+"until": "16:00",
+"allDay": false,
+"title": "Gallery Open to the Public",
+"cancelled": false
+},
+{
+"date": "2026-10-17",
+"end": null,
+"start": "17:30",
+"until": "20:30",
+"allDay": false,
+"title": "ELP Group 25",
+"cancelled": false
+},
+{
+"date": "2026-10-18",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Long-pose Session",
+"cancelled": false
+},
+{
+"date": "2026-10-18",
+"end": null,
+"start": "14:00",
+"until": "17:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-18",
+"end": null,
+"start": "17:30",
+"until": "20:30",
+"allDay": false,
+"title": "ELP Group 25",
+"cancelled": false
+},
+{
+"date": "2026-10-19",
+"end": null,
+"start": "18:00",
+"until": "09:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-20",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-20",
+"end": null,
+"start": "18:00",
+"until": "21:00",
+"allDay": false,
+"title": "Portrait Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-21",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-22",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-22",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-23",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Long-pose/Multiday session",
+"cancelled": false
+},
+{
+"date": "2026-10-24",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-24",
+"end": null,
+"start": "14:00",
+"until": "16:00",
+"allDay": false,
+"title": "Gallery Open to the Public",
+"cancelled": false
+},
+{
+"date": "2026-10-24",
+"end": null,
+"start": "17:30",
+"until": "20:30",
+"allDay": false,
+"title": "ELP Group 26",
+"cancelled": false
+},
+{
+"date": "2026-10-25",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Long-pose Session",
+"cancelled": false
+},
+{
+"date": "2026-10-25",
+"end": null,
+"start": "14:00",
+"until": "17:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-25",
+"end": null,
+"start": "17:30",
+"until": "20:30",
+"allDay": false,
+"title": "ELP Group 26",
+"cancelled": false
+},
+{
+"date": "2026-10-26",
+"end": null,
+"start": "18:00",
+"until": "09:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-27",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-27",
+"end": null,
+"start": "18:00",
+"until": "21:00",
+"allDay": false,
+"title": "Portrait Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-28",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-29",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-29",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-30",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Long-pose/Multiday session",
+"cancelled": false
+},
+{
+"date": "2026-10-31",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-10-31",
+"end": null,
+"start": "14:00",
+"until": "16:00",
+"allDay": false,
+"title": "Gallery Open to the Public",
+"cancelled": false
+},
+{
+"date": "2026-10-31",
+"end": null,
+"start": "17:30",
+"until": "20:30",
+"allDay": false,
+"title": "ELP Group 26",
+"cancelled": false
+},
+{
+"date": "2026-11-01",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Long-pose Session",
+"cancelled": false
+},
+{
+"date": "2026-11-01",
+"end": null,
+"start": "14:00",
+"until": "17:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-01",
+"end": null,
+"start": "17:30",
+"until": "20:30",
+"allDay": false,
+"title": "ELP Group 26",
+"cancelled": false
+},
+{
+"date": "2026-11-02",
+"end": null,
+"start": "18:00",
+"until": "09:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-03",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-03",
+"end": null,
+"start": "18:00",
+"until": "21:00",
+"allDay": false,
+"title": "Portrait Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-04",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-05",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-05",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-06",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Long-pose/Multiday session",
+"cancelled": false
+},
+{
+"date": "2026-11-07",
+"end": "2026-12-19",
+"start": null,
+"until": null,
+"allDay": true,
+"title": "Member Art Exhibit | Eastside Culture Crawl | Artists & Details TBA",
+"cancelled": false
+},
+{
+"date": "2026-11-07",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-07",
+"end": null,
+"start": "14:00",
+"until": "16:00",
+"allDay": false,
+"title": "Gallery Open to the Public",
+"cancelled": false
+},
+{
+"date": "2026-11-07",
+"end": null,
+"start": "18:00",
+"until": "21:00",
+"allDay": false,
+"title": "Gallery Opening Reception | Eastside Culture Crawl | Artists & Details TBA",
+"cancelled": false
+},
+{
+"date": "2026-11-08",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Long-pose Session",
+"cancelled": false
+},
+{
+"date": "2026-11-08",
+"end": null,
+"start": "14:00",
+"until": "17:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-09",
+"end": null,
+"start": "18:00",
+"until": "09:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+}
+]
+}
