@@ -1,5 +1,5 @@
 {
-"generated": "2026-09-14T00:19-07:00",
+"generated": "2026-09-18T12:44-07:00",
 "events": [
 {
 "date": "2026-09-12",
@@ -8,60 +8,6 @@
 "until": null,
 "allDay": true,
 "title": "Member Art Exhibit | Harvey Chan | Details TBA",
-"cancelled": false
-},
-{
-"date": "2026-09-13",
-"end": null,
-"start": "10:00",
-"until": "13:00",
-"allDay": false,
-"title": "Long-pose Session",
-"cancelled": false
-},
-{
-"date": "2026-09-13",
-"end": null,
-"start": "14:00",
-"until": "17:00",
-"allDay": false,
-"title": "Gesture Drawing Session",
-"cancelled": false
-},
-{
-"date": "2026-09-14",
-"end": null,
-"start": "18:00",
-"until": "09:00",
-"allDay": false,
-"title": "Regular Drawing Session",
-"cancelled": false
-},
-{
-"date": "2026-09-15",
-"end": null,
-"start": "10:00",
-"until": "13:00",
-"allDay": false,
-"title": "Regular Drawing Session",
-"cancelled": false
-},
-{
-"date": "2026-09-15",
-"end": null,
-"start": "18:00",
-"until": "21:00",
-"allDay": false,
-"title": "Portrait Drawing Session",
-"cancelled": false
-},
-{
-"date": "2026-09-16",
-"end": null,
-"start": "19:00",
-"until": "22:00",
-"allDay": false,
-"title": "Gesture Drawing Session",
 "cancelled": false
 },
 {
@@ -953,6 +899,60 @@
 "until": "09:00",
 "allDay": false,
 "title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-10",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-10",
+"end": null,
+"start": "18:00",
+"until": "21:00",
+"allDay": false,
+"title": "Portrait Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-11",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Gesture Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-12",
+"end": null,
+"start": "10:00",
+"until": "13:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-12",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Regular Drawing Session",
+"cancelled": false
+},
+{
+"date": "2026-11-13",
+"end": null,
+"start": "19:00",
+"until": "22:00",
+"allDay": false,
+"title": "Long-pose/Multiday session",
 "cancelled": false
 }
 ]
