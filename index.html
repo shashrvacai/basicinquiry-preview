@@ -19,25 +19,28 @@
 <div id="bi-loader" aria-hidden="true"><canvas></canvas></div>
 <script src="assets/bi-loader.js"></script>
 
-<!-- always there: the two things a visitor comes to do -->
-<nav class="bar" aria-label="Book or sign in">
+<!-- one bar: bottom while you look into the past, top while you read what is coming -->
+<nav class="bar" id="bar" aria-label="Book or sign in">
+  <a class="bar-mark" href="./" aria-label="Basic Inquiry, home"><img src="assets/logo.png" alt="" width="32" height="32"></a>
   <a class="pill pill-solid" id="book" href="#upcoming">Book a session</a>
-  <a class="pill" id="signin" href="https://www.scratchconsortium.com/alain2020/robostrar/" title="Opens Robostrar">Sign in</a>
+  <a class="pill pill-small" id="signin" href="https://www.scratchconsortium.com/alain2020/robostrar/" title="Opens Robostrar">Sign in</a>
 </nav>
 
-<main>
-  <!-- the past, newest first in reading order, drawn upward (column-reverse) -->
-  <section class="past" id="past" aria-label="Past sessions, with demo drawings from Cai's sketchbook">
-    <div class="past-track" id="past-track"></div>
-  </section>
+<!-- the past: the demo's 3D field, fixed behind the page; captions ride on top -->
+<div class="field" id="field" aria-hidden="false">
+  <div class="field-caps" id="field-caps" aria-label="Past days, newest first"></div>
+</div>
 
-  <!-- the landing point -->
-  <div class="centre" id="centre">
-    <p class="cue ui" id="cue-up"><svg viewBox="0 0 14 22" aria-hidden="true"><path d="M7 21V2M1 8l6-6 6 6" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>Scroll up for past sessions</p>
-    <img class="centre-logo" src="assets/logo.png" alt="" width="64" height="64">
-    <h1>Basic Inquiry<small>The Vancouver Life Drawing Society</small></h1>
-    <p class="note ui">This website is under construction.</p>
-    <p class="cue ui" id="cue-down">Scroll down for upcoming sessions<svg viewBox="0 0 14 22" aria-hidden="true"><path d="M7 1v19M1 14l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></p>
+<main>
+  <h1 class="sr-only">Basic Inquiry, the Vancouver Life Drawing Society</h1>
+  <!-- scroll room for the past: its height is the field's height -->
+  <div class="past" id="past" aria-hidden="true"></div>
+
+  <!-- the centre line, where the load lands -->
+  <div class="centre ui" id="centre">
+    <p class="cue" id="cue-up"><svg viewBox="0 0 14 22" aria-hidden="true"><path d="M7 21V2M1 8l6-6 6 6" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>Scroll up for past sessions</p>
+    <p class="note">This website is under construction.</p>
+    <p class="cue" id="cue-down">Scroll down for upcoming sessions<svg viewBox="0 0 14 22" aria-hidden="true"><path d="M7 1v19M1 14l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></p>
   </div>
 
   <div class="today ui" id="today" aria-hidden="true"></div>
@@ -76,7 +79,6 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
   // the sticky "today" line
   (function () {
@@ -85,6 +87,6 @@
       d.toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' }) + '</span>';
   })();
 </script>
-<script src="assets/home.js"></script>
+<script type="module" src="assets/home.js"></script>
 </body>
 </html>
