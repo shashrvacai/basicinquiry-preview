@@ -2,162 +2,210 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Basic Inquiry · The Vancouver Life Drawing Society</title>
 <meta name="description" content="Basic Inquiry, the Vancouver Life Drawing Society. Figure drawing sessions every week at 1011 Main Street, Vancouver.">
+<meta name="theme-color" content="#ffffff">
 <link rel="icon" href="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<!-- the Codrops Infinite Canvas demo's own fonts: Asul (title) + DM Sans (everything else) -->
+<link href="https://fonts.googleapis.com/css2?family=Asul:wght@400;700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/canvas.css">
 <style>
-/* Tokens copied from brycebaril/drawing-club src/app/globals.css ("Organic": paper, terracotta, sage)
-   so this page and the new app read as one site. */
-:root{
-  --color-bg:#f5ead8; --color-surface:#ebddc5; --color-text:#201e1d; --color-text-muted:#645c50;
-  --color-border:color-mix(in srgb,#201e1d 16%,transparent);
-  --color-accent:#c67139; --color-accent-hover:#b2622d;
-  --color-link:#8c491a; --color-link-hover:#643312;
-  --color-alert-bg:#fff2eb; --color-alert-border:#ffc6a5; --color-alert-text:#8c491a;
-  --color-status-bg:#f0fae1; --color-status-border:#ccdbb2; --color-status-text:#56633f;
-  --radius:16px;
-  --font-heading:"Caprasimo",Georgia,serif;
-  --font-body:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+/* Design language: the Codrops "Infinite Canvas" demo (white, DM Sans 300 uppercase at
+   12px, Asul titles, overlay text in mix-blend-mode: difference). Tokens in canvas.css. */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--ic-bg);color:var(--ic-ink)}
+body{font:300 12px/1.4 var(--ic-font-ui);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ic-ink);outline-offset:3px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+
+/* BI monogram loader, fronting the canvas */
+#bi-loader{position:fixed;inset:0;z-index:9999;background:var(--ic-bg);transition:opacity .5s ease-out}
+#bi-loader.done{opacity:0;pointer-events:none}
+#bi-loader canvas{width:100vw;height:100vh;display:block}
+
+/* the frame: fixed chrome over the canvas, after the demo's frame/style.module.css */
+.frame{position:fixed;inset:0;z-index:1000;pointer-events:none;display:grid;
+  padding:max(1rem,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  grid-template-columns:auto 1fr auto;grid-template-rows:minmax(44px,auto) auto 1fr minmax(44px,auto);
+  grid-template-areas:"logo . book" "note note note" "title title title" "week hint hint";
+  column-gap:1rem;row-gap:.5rem;align-items:center;text-transform:uppercase}
+.frame-ui>*{pointer-events:auto}
+.frame-text{color:#fff;mix-blend-mode:difference;z-index:999}
+.frame-logo{grid-area:logo;display:block;width:40px;height:40px;border-radius:50%;overflow:hidden}
+.frame-logo img{display:block;width:100%;height:100%}
+.frame-note{grid-area:note;margin:0;justify-self:center;text-align:center;letter-spacing:.02em;pointer-events:none}
+.frame-title{grid-area:title;margin:0;justify-self:center;align-self:center;text-align:center;pointer-events:none;
+  font:400 clamp(2rem,9vw,3rem)/1 var(--ic-font-title);letter-spacing:.01em}
+.frame-title small{display:block;margin-top:.6rem;font:300 12px/1.3 var(--ic-font-ui);letter-spacing:.02em}
+.frame-hint{grid-area:hint;margin:0;justify-self:end;text-align:right;pointer-events:none;letter-spacing:.02em}
+.frame-hint .t{display:none}
+@media (pointer:coarse){.frame-hint .m{display:none}.frame-hint .t{display:inline}}
+
+.pill{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-height:44px;padding:.35rem 1.1rem;
+  border:1px solid var(--ic-ink);border-radius:999px;background:var(--ic-bg);color:var(--ic-ink);
+  font:400 12px/1.15 var(--ic-font-ui);text-transform:uppercase;letter-spacing:.02em;text-decoration:none;cursor:pointer}
+.pill small{font-size:10px;font-weight:300;color:var(--ic-brown)}
+.pill:hover{background:var(--ic-ink);color:var(--ic-bg)}
+.pill:hover small{color:inherit}
+.pill-book{grid-area:book;justify-self:end}
+#week-open{grid-area:week;justify-self:start}
+
+@media (min-width:53em){
+  .frame{padding:1.5rem;grid-template-columns:auto 1fr auto;grid-template-rows:minmax(44px,auto) 1fr minmax(44px,auto);
+    grid-template-areas:"logo note book" "title title title" "week hint hint";column-gap:2rem}
+  .frame-note{align-self:center}
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{max-width:100vw;overflow-x:hidden}
-body{background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);font-size:1.0625rem;line-height:1.55;-webkit-font-smoothing:antialiased}
-img{max-width:100%;height:auto}
-a{color:var(--color-link)} a:hover{color:var(--color-link-hover)}
-a:focus-visible,.btn:focus-visible{outline:3px solid var(--color-text);outline-offset:3px;border-radius:6px}
-h1,h2,h3{font-family:var(--font-heading);font-weight:400;line-height:1.15}
-.wrap{width:100%;max-width:960px;margin:0 auto;padding:0 1rem}
-.muted{color:var(--color-text-muted)} .small{font-size:.9375rem}
 
-header{border-bottom:1px solid var(--color-border)}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-top:.75rem;padding-bottom:.75rem}
-.brand{display:flex;align-items:center;gap:.75rem;text-decoration:none;color:var(--color-text)}
-.brand img{border-radius:50%}
-.brand b{font-family:var(--font-heading);font-weight:400;font-size:1.25rem;display:block;line-height:1.1}
-.brand span{font-size:.875rem;color:var(--color-text-muted)}
-
-/* One action on the page, one colour for it. Terracotta fill with dark text: white on #c67139 is ~3:1, dark is ~5.6:1. */
-.btn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-height:48px;padding:.6rem 1.5rem;background:var(--color-accent);color:var(--color-text);font-weight:600;text-decoration:none;border-radius:999px;border:0;text-align:center}
-.btn:hover{background:var(--color-accent-hover);color:var(--color-text)}
-.btn small{font-weight:400;font-size:.8125rem}
-.btn-lg{font-size:1.1875rem;padding:.8rem 2rem}
-
-.hero{padding:3rem 0 2rem}
-.hero h1{font-size:clamp(2.1rem,6vw,3.25rem);margin-bottom:1rem}
-.hero p{max-width:40rem;margin-bottom:1.5rem}
-.facts{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;margin-top:1.25rem;list-style:none}
-.facts a{color:var(--color-text)}
-
-.notice{background:var(--color-alert-bg);border-bottom:1px solid var(--color-alert-border);color:var(--color-alert-text);padding:.5rem 1rem;text-align:center;font-size:.9375rem}
-
-section{padding:1.5rem 0 3rem}
-.week-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:.35rem}
-.week-head h2{font-size:1.75rem}
-.onwalls{background:var(--color-status-bg);border:1px solid var(--color-status-border);color:var(--color-status-text);border-radius:var(--radius);padding:.6rem 1rem;margin:1rem 0}
-.week{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.75rem;margin:1rem 0}
-.day{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius);padding:1rem}
-.day.today{border:2px solid var(--color-accent)}
-.day.empty{background:transparent}
-.day h3{font-size:1.125rem;display:flex;justify-content:space-between;align-items:baseline;gap:.5rem;margin-bottom:.6rem}
-.day h3 b{font-family:var(--font-body);font-weight:400;font-size:.875rem;color:var(--color-text-muted)}
-/* Each session is itself the way to book it: the action sits where the information is. */
-a.ev{display:block;text-decoration:none;color:var(--color-text);padding:.5rem .6rem;margin:0 -.6rem;border-radius:10px;min-height:44px}
-a.ev:hover{background:var(--color-bg)}
-a.ev time{display:block;font-weight:600}
-a.ev span.go{color:var(--color-link);font-size:.875rem;text-decoration:underline}
-p.ev.open{padding:.5rem 0}
-p.ev.open time{display:block;font-weight:600}
-p.ev.off{padding:.5rem 0;color:var(--color-text-muted)}
+/* This week: a sheet that slides up over the canvas */
+.sheet-scrim{position:fixed;inset:0;z-index:1500;background:rgba(255,255,255,.6);opacity:0;pointer-events:none;transition:opacity .4s ease}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:1600;max-height:86svh;overflow:auto;overscroll-behavior:contain;
+  background:var(--ic-bg);border-top:1px solid var(--ic-ink);
+  padding:1.25rem max(16px,env(safe-area-inset-right)) max(1.5rem,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  transform:translateY(100%);visibility:hidden;transition:transform .55s cubic-bezier(.2,.7,.1,1),visibility 0s linear .55s;
+  font:400 15px/1.5 var(--ic-font-ui)}
+body.sheet-open .sheet{transform:none;visibility:visible;transition:transform .55s cubic-bezier(.2,.7,.1,1),visibility 0s}
+body.sheet-open .sheet-scrim{opacity:1;pointer-events:auto}
+@media (prefers-reduced-motion:reduce){.sheet,body.sheet-open .sheet,.sheet-scrim{transition:none}}
+.sheet-in{max-width:1100px;margin:0 auto}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.75rem}
+.sheet-head h2{margin:0;font:400 clamp(1.5rem,5vw,2rem)/1 var(--ic-font-title);text-transform:uppercase}
+.label{font:300 12px/1.4 var(--ic-font-ui);text-transform:uppercase;letter-spacing:.02em}
+.onwalls{margin:.25rem 0 1rem;color:var(--ic-brown)}
+.week{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1px;background:var(--ic-brown-10);border:1px solid var(--ic-brown-10);margin:0 0 1rem}
+.day{background:var(--ic-bg);padding:.75rem .9rem 1rem}
+.day h3{margin:0 0 .4rem;display:flex;justify-content:space-between;gap:.5rem;font:400 12px/1.4 var(--ic-font-ui);text-transform:uppercase;letter-spacing:.02em}
+.day h3 b{font-weight:300;color:var(--ic-brown)}
+.day.today h3{text-decoration:underline;text-underline-offset:4px}
+a.ev{display:block;text-decoration:none;padding:.4rem .5rem;margin:0 -.5rem;min-height:44px}
+a.ev:hover{background:var(--ic-placeholder)}
+.ev time{display:block;font-weight:500}
+.ev .go{font:400 11px/1 var(--ic-font-ui);text-transform:uppercase;text-decoration:underline;text-underline-offset:3px;margin-left:.25rem}
+p.ev{margin:0;padding:.4rem 0}
+p.ev.off{color:var(--ic-brown)}
 p.ev.off time,p.ev.off span{text-decoration:line-through}
-p.ev.off em{font-style:normal;font-weight:600;color:var(--color-alert-text)}
-.none{color:var(--color-text-muted);font-size:.9375rem}
-
-footer{border-top:1px solid var(--color-border);padding:2rem 0 3rem;color:var(--color-text-muted)}
-footer p{margin-bottom:.75rem}
-@media (max-width:520px){.brand span{display:none}.bar .btn{padding:.5rem 1rem;white-space:nowrap}.hero{padding-top:2rem}}
+p.ev.off em{font-style:normal;font-weight:500}
+.none{margin:0;color:var(--ic-brown)}
+.sheet p{margin:0 0 .6rem}
+.sheet .small{font-size:13px;color:var(--ic-brown)}
+.sheet a{text-underline-offset:3px}
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap bar">
-    <a class="brand" href="./">
-      <img src="assets/logo.png" alt="" width="44" height="44">
-      <div><b>Basic Inquiry</b><span>The Vancouver Life Drawing Society</span></div>
-    </a>
-    <a class="btn" href="https://www.scratchconsortium.com/alain2020/robostrar/">Book a session</a>
-  </div>
-</header>
-<p class="notice">This website is under construction.</p>
 
-<main>
-<div class="wrap">
-  <div class="hero">
-    <h1>Welcome to Basic Inquiry</h1>
-    <p>The Vancouver Life Drawing Society. Not-for-profit, volunteer-run, ten sessions a week. Everyone is welcome, from beginners to seasoned artists!</p>
-    <a class="btn btn-lg" href="https://www.scratchconsortium.com/alain2020/robostrar/">Book a session<small>Opens Robostrar, our booking system</small></a>
-    <ul class="facts">
-      <li><a href="https://www.google.com/maps/search/?api=1&query=1011+Main+Street+Vancouver+BC">1011 Main Street, Vancouver</a></li>
-      <li><a href="tel:+16046812855">604.681.2855</a></li>
-      <li><a href="mailto:board@lifedrawing.org">board@lifedrawing.org</a></li>
-    </ul>
-  </div>
+<!-- Loading animation: Cai's BI monogram brushes itself on until the first screen of sketches is decoded -->
+<div id="bi-loader" aria-hidden="true"><canvas></canvas></div>
+<script src="assets/bi-loader.js"></script>
+
+<header class="frame frame-ui">
+  <a class="frame-logo" href="./"><img src="assets/logo.png" alt="Basic Inquiry" width="40" height="40"></a>
+  <a class="pill pill-book" href="https://www.scratchconsortium.com/alain2020/robostrar/">Book a session<small>opens Robostrar</small></a>
+  <button type="button" class="pill" id="week-open" aria-expanded="false" aria-controls="week-panel">This week</button>
+</header>
+<!-- text layer: white in mix-blend-mode difference, as the demo's frame, so it reads black on white and white over drawings -->
+<div class="frame frame-text">
+  <p class="frame-note">This website is under construction.</p>
+  <h1 class="frame-title">Basic Inquiry<small>The Vancouver Life Drawing Society</small></h1>
+  <p class="frame-hint"><span class="m">Drag to wander · scroll to go deeper · click a drawing</span><span class="t">Drag to wander · tap a drawing</span></p>
 </div>
 
-<section id="calendar">
-  <div class="wrap">
-    <div class="week-head"><h2>The next seven days</h2><span class="muted small">Pick a session to book it</span></div>
-    <p class="onwalls" id="onwalls" hidden></p>
+<main id="canvas" class="ic-root" tabindex="-1" aria-label="Sketchbook drawings, an endless field you can drag through"></main>
+
+<!-- words for search engines and screen readers: the canvas itself has none -->
+<div class="sr-only">
+  <p>The Vancouver Life Drawing Society. Not-for-profit, volunteer-run, ten sessions a week. Everyone is welcome, from beginners to seasoned artists!</p>
+  <h2>The weekly schedule</h2>
+  <ul>
+    <li>Monday Evening, 6 pm to 9 pm: Regular drawing session. 1, 2, 5 &amp; 10 minute warm ups, three ½ hour poses.</li>
+    <li>Tuesday Morning, 10 am to 1 pm: Regular drawing session. 1, 2, 5 &amp; 10 minute warm ups, three ½ hour poses.</li>
+    <li>Tuesday Evening, 6 pm to 9 pm: Portrait drawing session. A clothed, seated, 3-hour pose.</li>
+    <li>Wednesday Evening, 7 pm to 10 pm: Gestures. 2 to 5 minute poses.</li>
+    <li>Thursday Morning, 10 am to 1 pm: Regular drawing session. A changing variety of short and medium gestures, followed by several longer poses.</li>
+    <li>Thursday Evening, 7 pm to 10 pm: Regular drawing session. 1, 2, 5 &amp; 10 minute warm ups, three ½ hour poses.</li>
+    <li>Friday Evening, 7 pm to 10 pm: Long-pose / Multiday session. Same pose for three hours.</li>
+    <li>Saturday Morning, 10 am to 1 pm: Regular drawing session. 1, 2, 5 &amp; 10 minute warm ups, then several longer poses.</li>
+    <li>Sunday Morning, 10 am to 1 pm: Long-pose session. 30 minutes of warm-ups followed by a single two-hour pose.</li>
+    <li>Sunday Afternoon, 2 pm to 5 pm: Gestures. ½, 1, 2 and 5 minute poses for three hours.</li>
+  </ul>
+  <p>Book a session on Robostrar, our booking system. 1011 Main Street, Vancouver, BC V6A 4L4. 604.681.2855. board@lifedrawing.org</p>
+</div>
+
+<div class="sheet-scrim" id="sheet-scrim"></div>
+<section class="sheet" id="week-panel" role="dialog" aria-modal="true" aria-labelledby="week-title">
+  <div class="sheet-in">
+    <div class="sheet-head">
+      <h2 id="week-title" tabindex="-1">This week</h2>
+      <button type="button" class="pill" id="week-close">Close</button>
+    </div>
+    <p class="onwalls label" id="onwalls" hidden></p>
     <div class="week" id="week">
       <div class="day"><p class="none">The full schedule is on <a href="https://www.scratchconsortium.com/alain2020/robostrar/">Robostrar</a>.</p></div>
     </div>
-    <p class="small muted">Add the schedule to your calendar: <a href="https://calendar.google.com/calendar/u/0/r?cid=5a146f2ba73b44ac3e3834609ab83e7ffd65d3ccd857a5ac01d7d6e082d3063b%40group.calendar.google.com">Google</a> · <a href="webcal://calendar.google.com/calendar/ical/5a146f2ba73b44ac3e3834609ab83e7ffd65d3ccd857a5ac01d7d6e082d3063b%40group.calendar.google.com/public/basic.ics">Apple / Outlook</a></p>
+    <p class="small">Add the schedule to your calendar: <a href="https://calendar.google.com/calendar/u/0/r?cid=5a146f2ba73b44ac3e3834609ab83e7ffd65d3ccd857a5ac01d7d6e082d3063b%40group.calendar.google.com">Google</a> · <a href="webcal://calendar.google.com/calendar/ical/5a146f2ba73b44ac3e3834609ab83e7ffd65d3ccd857a5ac01d7d6e082d3063b%40group.calendar.google.com/public/basic.ics">Apple / Outlook</a></p>
+    <p><a href="https://www.google.com/maps/search/?api=1&amp;query=1011+Main+Street+Vancouver+BC">1011 Main Street, Vancouver, BC V6A 4L4</a> · <a href="tel:+16046812855">604.681.2855</a> · <a href="mailto:board@lifedrawing.org">board@lifedrawing.org</a> · <a href="https://www.instagram.com/basicinquiry/">Instagram</a> · <a href="https://www.facebook.com/basicinquiry">Facebook</a></p>
+    <p class="small">We acknowledge at our Studio that we gather on the traditional, ancestral, and unceded territory of the Coast Salish Peoples, including the territories of the xʷməθkʷəy̓əm (Musqueam), Sḵwx̱wú7mesh (Squamish), and səlilwətaɬ (Tsleil-Waututh) Nations.</p>
+    <p class="small">© 2026 Basic Inquiry, The Vancouver Life Drawing Society · Drawings by Cai, from <a href="https://shashrvacai.com/blog">his sketchbook</a>. Canvas after <a href="https://tympanus.net/codrops/?p=106679">Infinite Canvas</a> by Edoardo Lunardi for Codrops.</p>
   </div>
 </section>
-</main>
 
-<footer>
-  <div class="wrap">
-    <p>1011 Main Street, Vancouver, BC V6A 4L4 · 604.681.2855 · <a href="mailto:board@lifedrawing.org">board@lifedrawing.org</a> · <a href="https://www.instagram.com/basicinquiry/">Instagram</a> · <a href="https://www.facebook.com/basicinquiry">Facebook</a></p>
-    <p class="small">We acknowledge at our Studio that we gather on the traditional, ancestral, and unceded territory of the Coast Salish Peoples, including the territories of the xʷməθkʷəy̓əm (Musqueam), Sḵwx̱wú7mesh (Squamish), and səlilwətaɬ (Tsleil-Waututh) Nations.</p>
-    <p class="small">© 2026 Basic Inquiry, The Vancouver Life Drawing Society</p>
-  </div>
-</footer>
+<script type="module">
+import { mountInfiniteCanvas } from './assets/canvas.js';
+const ready = () => window.BILoader?.ready();
+try {
+  const data = await (await fetch('assets/sketchbook.json')).json();
+  const sorted = [...data].sort((a, b) => b.date.localeCompare(a.date));   // newest first
+  const posts = sorted.map((p) => ({ title: p.title, date: p.date, href: 'https://shashrvacai.com/blog/' + p.slug }));
+  const media = sorted.flatMap((p, i) => p.imgs.map((im) => ({ url: im.src, w: im.w, h: im.h, post: i })));
+  window.ic = mountInfiniteCanvas(document.getElementById('canvas'), { media, posts, onReady: ready });
+} catch (e) { console.error(e); ready(); }
+</script>
 
 <script>
-// Next seven days from assets/events.json (refresh-calendar.py pulls the public Google Calendar).
-// If the file is missing, or its data no longer reaches the end of the week, the Robostrar line
-// already in the markup stays: a stale schedule is worse than no schedule.
-(async function(){
+// "This week" sheet. Data from assets/events.json (refresh-calendar.py pulls the public
+// Google Calendar). If the file is missing, or its data no longer reaches the end of the
+// week, the Robostrar line in the markup stays: a stale schedule is worse than none.
+(function(){
+  const body=document.body, openBtn=document.getElementById('week-open'), closeBtn=document.getElementById('week-close');
+  const panel=document.getElementById('week-panel'), scrim=document.getElementById('sheet-scrim'), title=document.getElementById('week-title');
+  const canvasRoot=document.getElementById('canvas'), frame=document.querySelector('.frame-ui');
+  function open(){ body.classList.add('sheet-open'); body.dataset.sheetOpen='1'; openBtn.setAttribute('aria-expanded','true');
+    canvasRoot.inert=true; frame.inert=true; setTimeout(()=>title.focus({preventScroll:true}),30); }
+  function close(){ if(!body.classList.contains('sheet-open')) return; body.classList.remove('sheet-open'); delete body.dataset.sheetOpen;
+    openBtn.setAttribute('aria-expanded','false'); canvasRoot.inert=false; frame.inert=false; openBtn.focus({preventScroll:true}); }
+  openBtn.addEventListener('click',open); closeBtn.addEventListener('click',close); scrim.addEventListener('click',close);
+  panel.addEventListener('keydown',e=>{ if(e.key==='Escape'){ e.preventDefault(); close(); } });
+
   const BOOK='https://www.scratchconsortium.com/alain2020/robostrar/';
-  const wk=document.getElementById('week'); if(!wk) return;
-  let data; try{ data=(await (await fetch('assets/events.json',{cache:'no-cache'})).json()).events; }catch(e){ return; }
-  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  const now=new Date(), pad=n=>String(n).padStart(2,'0'), iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
-  const hm=t=>{ const [h,m]=t.split(':').map(Number); return (h%12||12)+(m?':'+pad(m):'')+' '+(h<12?'am':'pm'); };
-  const days=[]; for(let i=0;i<7;i++) days.push(new Date(now.getFullYear(),now.getMonth(),now.getDate()+i));
-  const t0=iso(days[0]), t6=iso(days[6]);
-  const last=data.reduce((m,e)=>e.date>m?e.date:m,'');
-  if(last<t6) return;
-  const walls=data.filter(e=>e.allDay&&e.date<=t6&&(e.end||e.date)>=t0&&!e.cancelled);
-  const ow=document.getElementById('onwalls');
-  if(walls.length){ ow.hidden=false; ow.innerHTML='On the walls: '+walls.map(e=>'<b>'+esc(e.title.replace(/\s*\|\s*/g,' · '))+'</b>').join(', '); }
-  wk.innerHTML=days.map((d,i)=>{
-    const k=iso(d), evs=data.filter(e=>!e.allDay&&e.date===k);
-    const lab=i===0?'Today':i===1?'Tomorrow':d.toLocaleDateString('en-CA',{weekday:'long'});
-    const body=evs.length?evs.map(e=>{
-      const t='<time>'+hm(e.start)+(e.until&&e.until>e.start?' – '+hm(e.until):'')+'</time>';
-      return e.cancelled
-        ? '<p class="ev off">'+t+'<span>'+esc(e.title)+'</span> <em>Cancelled</em></p>'
-        : /^gallery/i.test(e.title)
-        ? '<p class="ev open">'+t+'<span>'+esc(e.title)+'</span></p>'
-        : '<a class="ev" href="'+BOOK+'">'+t+esc(e.title)+' <span class="go">Book</span></a>';
-    }).join(''):'<p class="none">No session</p>';
-    return '<div class="day'+(i===0?' today':'')+(evs.length?'':' empty')+'"><h3>'+lab+'<b>'+d.toLocaleDateString('en-CA',{month:'short',day:'numeric'})+'</b></h3>'+body+'</div>';
-  }).join('');
+  const wk=document.getElementById('week');
+  fetch('assets/events.json',{cache:'no-cache'}).then(r=>r.json()).then(j=>{
+    const data=j.events;
+    const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const now=new Date(), pad=n=>String(n).padStart(2,'0'), iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+    const hm=t=>{ const [h,m]=t.split(':').map(Number); return (h%12||12)+(m?':'+pad(m):'')+' '+(h<12?'am':'pm'); };
+    const days=[]; for(let i=0;i<7;i++) days.push(new Date(now.getFullYear(),now.getMonth(),now.getDate()+i));
+    const t0=iso(days[0]), t6=iso(days[6]);
+    const last=data.reduce((m,e)=>e.date>m?e.date:m,'');
+    if(last<t6) return;
+    const walls=data.filter(e=>e.allDay&&e.date<=t6&&(e.end||e.date)>=t0&&!e.cancelled);
+    const ow=document.getElementById('onwalls');
+    if(walls.length){ ow.hidden=false; ow.innerHTML='On the walls: '+walls.map(e=>esc(e.title.replace(/\s*\|\s*/g,' · '))).join(', '); }
+    wk.innerHTML=days.map((d,i)=>{
+      const k=iso(d), evs=data.filter(e=>!e.allDay&&e.date===k);
+      const lab=i===0?'Today':i===1?'Tomorrow':d.toLocaleDateString('en-CA',{weekday:'long'});
+      const rows=evs.length?evs.map(e=>{
+        const t='<time>'+hm(e.start)+(e.until&&e.until>e.start?' to '+hm(e.until):'')+'</time>';
+        return e.cancelled
+          ? '<p class="ev off">'+t+'<span>'+esc(e.title)+'</span> <em>Cancelled</em></p>'
+          : /^gallery/i.test(e.title)
+          ? '<p class="ev">'+t+'<span>'+esc(e.title)+'</span></p>'
+          : '<a class="ev" href="'+BOOK+'">'+t+esc(e.title)+'<span class="go">Book</span></a>';
+      }).join(''):'<p class="none">No session</p>';
+      return '<div class="day'+(i===0?' today':'')+'"><h3>'+lab+'<b>'+d.toLocaleDateString('en-CA',{month:'short',day:'numeric'})+'</b></h3>'+rows+'</div>';
+    }).join('');
+  }).catch(()=>{});
 })();
 </script>
 </body>

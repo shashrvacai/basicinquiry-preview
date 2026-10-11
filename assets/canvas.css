@@ -1,0 +1,39 @@
+/* Basic Inquiry infinite canvas. Look taken from the Codrops "Infinite Canvas" demo
+   (index.css, frame/style.module.css, loader/style.module.css):
+   page + fog #ffffff, loader bar rgb(101,82,60) on a 10% tint of it,
+   UI type DM Sans 300 uppercase 12px, display type Asul. */
+:root {
+  --ic-bg: #ffffff;
+  --ic-ink: #000000;
+  --ic-brown: rgb(101, 82, 60);
+  --ic-brown-10: rgba(101, 82, 60, 0.1);
+  --ic-placeholder: #f0eeec;   /* the 10% brown tint flattened onto white */
+  --ic-font-ui: "DM Sans", system-ui, sans-serif;
+  --ic-font-title: "Asul", Georgia, serif;
+}
+
+.ic-root { position: fixed; inset: 0; background: var(--ic-bg); touch-action: none; overflow: hidden; }
+.ic-canvas { display: block; width: 100%; height: 100%; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+/* keyboard targets: invisible until focused; the ring on the drawing is the visible focus */
+.ic-keys { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; margin: 0; padding: 0; list-style: none; }
+.ic-ring { position: absolute; left: 0; top: 0; pointer-events: none; border: 2px solid var(--ic-ink); outline: 2px solid var(--ic-bg); z-index: 5; will-change: transform; }
+.ic-ring-label { position: absolute; left: -2px; top: 100%; margin-top: 6px; background: var(--ic-ink); color: var(--ic-bg); font: 400 11px/1.3 var(--ic-font-ui); text-transform: uppercase; letter-spacing: .02em; padding: 3px 6px; white-space: nowrap; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
+
+/* selected drawing */
+.ic-lb { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 64px 16px 32px; }
+.ic-lb[hidden] { display: none; }
+.ic-lb-arming, .ic-lb-arming * { pointer-events: none !important; }
+.ic-lb-scrim { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.94); cursor: zoom-out; }
+.ic-lb-fig { position: relative; margin: 0; display: flex; flex-direction: column; align-items: center; gap: 18px; max-width: 100%; pointer-events: none; }
+.ic-lb-img { display: block; object-fit: contain; background: var(--ic-placeholder); transform-origin: center center; pointer-events: auto; box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1); }
+.ic-lb-cap { text-align: center; color: var(--ic-ink); pointer-events: auto; max-width: 34rem; }
+.ic-lb-title { font: 400 clamp(1.25rem, 3.2vw, 1.75rem)/1.15 var(--ic-font-title); margin: 0 0 6px; text-transform: uppercase; }
+.ic-lb-date { display: block; font: 300 12px/1.4 var(--ic-font-ui); text-transform: uppercase; letter-spacing: .02em; color: var(--ic-brown); margin-bottom: 10px; }
+.ic-lb-link { font: 400 12px/1 var(--ic-font-ui); text-transform: uppercase; letter-spacing: .02em; color: var(--ic-ink); text-decoration: underline; text-underline-offset: 3px; display: inline-block; padding: 10px 4px; }
+.ic-lb-close { position: absolute; top: 16px; right: 16px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--ic-ink); background: var(--ic-bg); color: var(--ic-ink); font: 400 12px/1 var(--ic-font-ui); text-transform: uppercase; letter-spacing: .02em; cursor: pointer; }
+.ic-lb-close:focus-visible, .ic-lb-link:focus-visible { outline: 2px solid var(--ic-ink); outline-offset: 3px; }
+
+/* no WebGL */
+.ic-fallback { position: absolute; inset: 0; overflow: auto; touch-action: auto; display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; align-content: flex-start; padding: 140px 16px 120px; }
+.ic-fallback img { display: block; height: 160px; width: auto; }
