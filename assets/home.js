@@ -495,7 +495,7 @@ function frame() {
   if (pastEl.offsetHeight < worldTop / wpp + innerHeight * 0.3) growSpacer();
 
   const v = new THREE_.Vector3();
-  const near = view * 1.2, far = view * 3;
+  const near = view * 1.2, far = view * 1.8;
   for (const c of clusters) {
     const dy = Math.max(c.y0 - cam.y, cam.y - (c.y0 + c.H), 0);
     if (dy < near && !c.planes) buildPlanes(c);
