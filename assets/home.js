@@ -273,7 +273,6 @@ const OPACITY_LERP = 0.18;         // its plane fade-in
 const CAMERA_Z = 50, FOV = 60, NEAR = 1, FAR = 500, FOG_NEAR = 120, FOG_FAR = 320;
 const DRIFT = 8.0, DRIFT_LERP = 0.12;   // its mouse drift (desktop only)
 const DEPTH_CHUNKS = 2;            // the demo shows planes up to its render distance of 2 chunks deep
-const DAY_GAP = 18;                // breathing room between two days, in world units
 const seededRandom = (seed) => { const x = Math.sin(seed * 9999) * 10000; return x - Math.floor(x); };
 const hashString = (str) => { let v = 0; for (let i = 0; i < str.length; i++) v = ((v << 5) - v + str.charCodeAt(i)) | 0; return Math.abs(v); };
 const visH = (d) => 2 * d * Math.tan((FOV / 2) * Math.PI / 180);
@@ -288,12 +287,18 @@ const cam = { x: 0, y: 0, tx: 0, ty: 0, drift: { x: 0, y: 0 }, mouse: { x: 0, y:
 const textures = new Map();
 let inFlight = 0;
 
-// the field's width at its middle depth (the frustum widens with depth, as in the demo)
-function slabWidth() { return Math.max(CHUNK_SIZE, visH(CAMERA_Z - 40 + CHUNK_SIZE * DEPTH_CHUNKS / 2) * (innerWidth / innerHeight)); }   // never narrower than one chunk
-function clusterHeight(n) {
-  // keep the demo's density: (110^3 / 5) units of space per drawing
+// The field is as wide as the view at the farthest depth a drawing can still be seen
+// (where depthFade^2 drops under 0.05), so every depth is filled edge to edge as in the
+// demo's endless chunks; drawings close to the lens mostly land off to the sides.
+const FARTHEST = DEPTH_FADE_END - Math.sqrt(0.05) * (DEPTH_FADE_END - DEPTH_FADE_START);
+function slabWidth() { return visH(FARTHEST) * (innerWidth / innerHeight); }
+// The demo's density on average: (110^3 / 5) units of space per drawing. A day packs its
+// drawings into 65% of its share of height and leaves 35% as air, so days read as clusters
+// while the field as a whole keeps the demo's density.
+function dayShare(n) {
   const perDrawing = (CHUNK_SIZE ** 3 / PLANES_PER_CHUNK) / (slabWidth() * CHUNK_SIZE * DEPTH_CHUNKS);
-  return Math.max(30, n * perDrawing);
+  const total = Math.max(16, n * perDrawing);
+  return { H: total * 0.65, gap: total * 0.35 };
 }
 
 function addCluster() {
@@ -306,8 +311,8 @@ function addCluster() {
     const n = 3 + (g % 4);   // 3 to 6 drawings per session
     for (const im of post.imgs.slice(0, n)) items.push({ src: im.src, w: im.w, h: im.h, post, session: s });
   }
-  const H = clusterHeight(items.length);
-  const c = { k, lap, date: day.date, sessions: day.sessions, items, y0: worldTop + (k === 0 ? 14 : DAY_GAP), H, seed: hashString(`${day.date}#${lap}`), planes: null, cap: null };
+  const { H, gap } = dayShare(items.length);
+  const c = { k, lap, date: day.date, sessions: day.sessions, items, y0: worldTop + (k === 0 ? 14 : gap), H, seed: hashString(`${day.date}#${lap}`), planes: null, cap: null };
   worldTop = c.y0 + H;
   clusters.push(c);
   return c;
@@ -439,12 +444,37 @@ function placeCaption(c, v) {
     const next = clusters.slice(0, c.k).reverse().find((o) => o.cap);
     if (next) next.cap.after(c.cap); else capsLayer.prepend(c.cap);
   }
-  // the caption sits under the day's cluster, on the focal plane
+  // the caption sits under the day's cluster, on the focal plane, but never on a drawing:
+  // it slides along its row (and a little up or down) to the first clear spot, else it hides
   v.set(-(visH(CAMERA_Z) * innerWidth / innerHeight) / 2 * 0.86, c.y0 - 2, 0).project(camera);
-  const px = Math.max(12, (v.x + 1) / 2 * innerWidth), py = (1 - v.y) / 2 * innerHeight;
+  const px0 = (v.x + 1) / 2 * innerWidth, py0 = (1 - v.y) / 2 * innerHeight;
+  const w = c.cap.offsetWidth || 90, hgt = c.cap.offsetHeight || 32, pad = 4;
+  const hits = (x, y) => frameRects.some((r) => x < r.x1 + pad && x + w > r.x0 - pad && y < r.y1 + pad && y + hgt > r.y0 - pad);
+  let spot = null;
+  for (const dy of [0, 22, -22, 44, -44]) {
+    const y = py0 + dy;
+    for (let x = Math.max(12, px0); x <= innerWidth - w - 12 && !spot; x += 14) if (!hits(x, y)) spot = [x, y];
+    for (let x = Math.max(12, px0) - 14; x >= 12 && !spot; x -= 14) if (!hits(x, y)) spot = [x, y];
+    if (spot) break;
+  }
+  const focused = c.cap === document.activeElement;
+  if (!spot && !focused) { c.cap.style.visibility = 'hidden'; return; }
+  c.cap.style.visibility = '';
+  const [px, py] = spot || [Math.max(12, px0), py0];
   c.cap.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px)`;
 }
 
+let frameRects = [];
+if (location.search.includes('debug')) window.__biCaps = () => {
+  let shown = 0, bad = 0;
+  for (const el of document.querySelectorAll('.daycap')) {
+    if (el.style.visibility === 'hidden') continue;
+    const r = el.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) continue;
+    shown++;
+    if (frameRects.some((q) => r.left < q.x1 && r.right > q.x0 && r.top < q.y1 && r.bottom > q.y0)) bad++;
+  }
+  return [shown, bad];
+};
 function frame() {
   requestAnimationFrame(frame);
   const off = lineOffsetPx();
@@ -480,6 +510,17 @@ function frame() {
       p.mat.opacity = opaque ? 1 : p.opacity; p.mat.depthWrite = opaque;
       p.mesh.visible = p.opacity > INVIS && !p.hidden;
     }
+  }
+  // screen boxes of every drawing that shows, so captions can keep off them
+  frameRects = [];
+  for (const c of clusters) if (c.planes) for (const p of c.planes) {
+    if (!p.mesh.visible || p.opacity < 0.05) continue;
+    const r = screenRect(p);
+    if (r.left + r.width < 0 || r.left > innerWidth || r.top + r.height < 0 || r.top > innerHeight) continue;
+    frameRects.push({ x0: r.left, y0: r.top, x1: r.left + r.width, y1: r.top + r.height });
+  }
+  for (const c of clusters) {
+    if (!c.planes) continue;
     const capOn = Math.abs(c.y0 - cam.y) < visH(CAMERA_Z) * 0.75;
     if (capOn) placeCaption(c, v); else if (c.cap && c.cap !== document.activeElement) { c.cap.remove(); c.cap = null; }
   }
@@ -487,11 +528,22 @@ function frame() {
   renderer.render(scene, camera);
 }
 let frameCount = 0;
+if (location.search.includes('debug')) window.__biCount = () => {   // same metric as the demo count: any part on screen, faded >= 0.05
+  let n = 0, crisp = 0; const t = Math.tan(Math.PI / 6), asp = innerWidth / innerHeight;
+  for (const c of clusters) if (c.planes) for (const p of c.planes) {
+    const d = CAMERA_Z - p.z; if (d < 1) continue;
+    const f = d <= DEPTH_FADE_START ? 1 : Math.max(0, 1 - (d - DEPTH_FADE_START) / (DEPTH_FADE_END - DEPTH_FADE_START)); if (f * f < 0.05) continue;
+    const hh = d * t, hw = hh * asp, x = p.mesh.position.x, y = p.mesh.position.y, w = p.mesh.scale.x, hgt = p.mesh.scale.y;
+    if (x + w / 2 < cam.x - hw || x - w / 2 > cam.x + hw || y + hgt / 2 < cam.y - hh || y - hgt / 2 > cam.y + hh) continue;
+    n++; if (d <= DEPTH_FADE_START) crisp++;
+  }
+  return [n, crisp];
+};
 if (location.search.includes('debug')) window.__bi = () => {
   let built = 0, vis = 0, crisp = 0;
   const f = new THREE_.Frustum().setFromProjectionMatrix(new THREE_.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
   for (const c of clusters) if (c.planes) for (const p of c.planes) { built++; if (p.mesh.visible && f.containsPoint(p.mesh.position)) { vis++; if (p.opacity > 0.5) crisp++; } }
-  return { tx: cam.tx, point: (() => { for (const c of clusters) if (c.planes) for (const p of c.planes) { if (!p.loaded || p.opacity < 0.9 || !p.mesh.visible) continue; const r = screenRect(p); const x = r.left + r.width / 2, y = r.top + r.height / 2; if (x > 30 && x < innerWidth - 30 && y > 30 && y < innerHeight - 140 && pickAt(x, y) === p) return { x, y }; } return null; })(), clusters: clusters.length, H: clusters.slice(0, 5).map((c) => [c.items.length, Math.round(c.H)]), built, vis, crisp, camY: Math.round(cam.y), worldTop: Math.round(worldTop) };
+  return { total: clusters.reduce((a, c) => a + c.items.length, 0), tx: cam.tx, point: (() => { for (const c of clusters) if (c.planes) for (const p of c.planes) { if (!p.loaded || p.opacity < 0.9 || !p.mesh.visible) continue; const r = screenRect(p); const x = r.left + r.width / 2, y = r.top + r.height / 2; if (x > 30 && x < innerWidth - 30 && y > 30 && y < innerHeight - 140 && pickAt(x, y) === p) return { x, y }; } return null; })(), clusters: clusters.length, H: clusters.slice(0, 5).map((c) => [c.items.length, Math.round(c.H)]), built, vis, crisp, camY: Math.round(cam.y), worldTop: Math.round(worldTop) };
 };
 
 // ---------- pointer: tap a drawing, drag sideways (bounded), drift with the mouse ----------
