@@ -58,15 +58,19 @@ button { font: inherit; color: inherit; }
 .bar #book { flex: 0 1 220px; }
 .pill-small { min-height: 36px; padding: 0 .9rem; font-size: 11px; border-color: var(--brown); color: var(--brown); }
 
-/* ---------- past: the demo's 3D field, fixed behind; the page scrolls over it ---------- */
-.field { position: fixed; inset: 0; z-index: 0; }
-.field-canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; cursor: grab; }
-.field-caps { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.daycap { position: absolute; left: 0; top: 0; pointer-events: auto; border: 0; background: rgba(255, 255, 255, .88); border-radius: 3px; padding: 6px 6px; min-height: 32px;
-  color: var(--brown); cursor: pointer; will-change: transform; text-decoration: underline; text-decoration-color: var(--brown-10); text-underline-offset: 4px; }
-.daycap:hover { color: var(--ink); }
-.past { pointer-events: none; }
-main > *:not(.past):not(.dock) { position: relative; z-index: 1; }
+/* ---------- past: the wall of drawings (bricks fall into their slots; slots stay in the flow) ---------- */
+.wall { width: min(100% - 32px, 1100px); margin: 0 auto; padding-top: 40px; }
+.wday { padding-top: 22px; }
+.wrow { display: flex; gap: 6px; margin-top: 6px; }
+.slot { position: relative; flex: none; }
+.brick { position: absolute; inset: 0; padding: 0; border: 0; border-radius: 4px; overflow: hidden; background: var(--tint); cursor: zoom-in;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, .1); transform-origin: center; will-change: transform, opacity; }
+.brick img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.brick:active img { transform: scale(.96); }
+.daycap { display: block; margin: 8px 0 0; padding: 6px 0; min-height: 32px; border: 0; background: none; color: var(--ink); font-weight: 500;
+  cursor: pointer; text-align: left; }
+.daycap:hover { text-decoration: underline; text-underline-offset: 4px; }
+main > *:not(.dock) { position: relative; z-index: 1; }
 
 /* ---------- the centre line (landing point) ---------- */
 .centre { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 16px 12px; text-align: center; color: var(--brown); }
@@ -86,10 +90,12 @@ body.cues-off .cue { opacity: 0; }
 .day-h:focus { outline: none; }
 .day-h b { font-weight: 500; color: var(--ink); }
 .day-h span { color: var(--brown); }
-.sess { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; margin: 0 0 22px; padding: 22px 18px 20px;
-  background: var(--bg); box-shadow: 0 0 10px 0 rgba(0, 0, 0, .1); }
-.poster { width: 72px; height: 96px; display: flex; flex-direction: column; justify-content: space-between; padding: 8px 7px; color: #fff; text-align: left;
+.sess { display: grid; grid-template-columns: 96px 1fr; margin: 0 0 16px; border-radius: 16px; overflow: hidden; background: var(--bg);
+  box-shadow: 0 2px 14px 0 rgba(0, 0, 0, .08); }
+.sess-body { display: flex; flex-direction: column; gap: 2px; padding: 16px 16px 16px 18px; min-width: 0; }
+.poster { width: 72px; height: 96px; display: flex; flex-direction: column; justify-content: space-between; padding: 8px 7px; color: #fff;
   background: var(--t-other); font: 400 13px/1.05 var(--font-title); text-transform: uppercase; overflow: hidden; }
+.sess .poster { width: auto; height: auto; min-height: 136px; padding: 12px 10px; }
 .poster small { font: 300 9px/1.2 var(--font-ui); letter-spacing: .04em; opacity: .85; }
 .poster.regular { background: var(--t-regular); } .poster.gesture { background: var(--t-gesture); }
 .poster.portrait { background: var(--t-portrait); } .poster.longpose { background: var(--t-longpose); }
@@ -97,7 +103,7 @@ body.cues-off .cue { opacity: 0; }
 .poster.gallery, .poster.exhibit, .poster.reception { background: var(--tint); color: var(--brown); }
 .sess-t { margin: 0 0 2px; font: 500 16px/1.25 var(--font-ui); }
 .sess-when { margin: 0; color: var(--brown); font-size: 14px; }
-.sess-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
+.sess-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .sess-actions .pill-solid { padding: 0 1.4rem; }
 .sess.plain .sess-t { font-weight: 400; }
 .sess.cancelled .sess-t, .sess.cancelled .sess-when time { text-decoration: line-through; }
@@ -122,7 +128,7 @@ body.cues-off .cue { opacity: 0; }
 .dlg-body .poster { width: 96px; height: 128px; font-size: 16px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cue, .pill, .pimg img { transition: none; }
+  .cue, .pill, .brick img { transition: none; }
 }
 
 /* a past day, opened */

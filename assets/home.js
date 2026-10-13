@@ -1,17 +1,16 @@
 /*
- * Basic Inquiry home page: one time axis. The past is a 3D field of drawings above the centre
- * line, upcoming sessions run downward below it, "today" sticks at the line.
+ * Basic Inquiry home page: one time axis. The past sits above the centre line as a wall of
+ * drawings, one block per day, newest nearest today; upcoming sessions run downward below it
+ * as floating tiles. The today line and the bar are one sticky block in the page.
  *
- * The field is the scene of "Infinite Canvas" by Edoardo Lunardi for Codrops
- * (https://tympanus.net/Tutorials/InfiniteCanvas/ , github.com/edoardolunardi/infinite-canvas,
- * MIT licence, (c) Codrops): its three.js camera (fov 60, z 50), fog (120 to 320), depth fade
- * (140 to 260), plane sizes (the demo's 12 to 20 units, scaled up 1.6x on Cai's word), density (5 per 110-unit chunk), seeded layout,
- * fade-in and easing (lerp 0.16), mouse drift. Only the axis changes: page scroll moves the
- * camera up into the past instead of the wheel flying it forward. One cluster per past day.
+ * The wall (Cai 10-13, replacing the Codrops 3D field): a drawing whose spot is high above
+ * waits small and scattered in the sky at the top of the screen and falls into its spot as the
+ * page scrolls up; scrolling down lifts it back into the sky. GSAP drives the ticker and the
+ * easing; the look (white page, DM Sans + Asul, the brown accent) is still the Codrops
+ * "Infinite Canvas" demo's (Edoardo Lunardi, MIT, (c) Codrops).
  *
  * Data: assets/events.json (refresh-calendar.py, today-60 .. today+60 days) and
- * assets/sketchbook.json (demo images: Cai's sketchbook). No bundler; three is vendored and
- * imported on demand. The bar rides with the today line (CSS sticky), no script moves it.
+ * assets/sketchbook.json (demo images: Cai's sketchbook). No bundler.
  */
 const BOOK_URL = 'https://www.scratchconsortium.com/alain2020/robostrar/';
 const SIGN_IN_URL = BOOK_URL;   // Robostrar member login for now; drawing-club's sign-in later
@@ -215,10 +214,10 @@ function renderUpcoming(events, root) {
         view);
       sec.append(h('article', { class: `sess${type.plain ? ' plain' : ''}${e.cancelled ? ' cancelled' : ''}` },
         poster(type),
-        h('div', {},
+        h('div', { class: 'sess-body' },
           h('h3', { class: 'sess-t', text: (ongoing ? 'On the walls: ' : '') + parts[0] + (parts.length > 1 && type.key !== 'gallery' ? ' · ' + parts.slice(1).join(' · ') : '') }),
-          h('p', { class: 'sess-when' }, h('time', { text: when }), e.cancelled ? h('span', { class: 'cancel-tag', text: ' Cancelled' }) : null)),
-        actions));
+          h('p', { class: 'sess-when' }, h('time', { text: when }), e.cancelled ? h('span', { class: 'cancel-tag', text: ' Cancelled' }) : null),
+          actions)));
     }
     frag.push(sec);
   }
@@ -263,48 +262,26 @@ function showDay(cluster, returnFocus) {
   ], { returnFocus });
 }
 
-// ---------- the past: the demo's 3D field, travelled vertically ----------
-// Values from the demo's constants.ts / scene.tsx / utils.ts (Codrops Infinite Canvas):
-const CHUNK_SIZE = 110;            // a chunk is a 110-unit cube
-const PLANES_PER_CHUNK = 5;        // holding 5 drawings: the demo's density
-const DEPTH_FADE_START = 140, DEPTH_FADE_END = 260, INVIS = 0.01;
-const VELOCITY_LERP = 0.16;        // the demo's easing toward a moving target
-const OPACITY_LERP = 0.18;         // its plane fade-in
-const CAMERA_Z = 50, FOV = 60, NEAR = 1, FAR = 500, FOG_NEAR = 120, FOG_FAR = 320;
-const DRIFT = 8.0, DRIFT_LERP = 0.12;   // its mouse drift (desktop only)
-const SIZE_SCALE = 1.6;          // Cai 10-13: bigger drawings than the demo's
-const DEPTH_CHUNKS = 2;            // the demo shows planes up to its render distance of 2 chunks deep
-const seededRandom = (seed) => { const x = Math.sin(seed * 9999) * 10000; return x - Math.floor(x); };
-const hashString = (str) => { let v = 0; for (let i = 0; i < str.length; i++) v = ((v << 5) - v + str.charCodeAt(i)) | 0; return Math.abs(v); };
-const visH = (d) => 2 * d * Math.tan((FOV / 2) * Math.PI / 180);
-
-const field = $('#field'), capsLayer = $('#field-caps'), pastEl = $('#past'), lineEl = $('#centre');
-let THREE_ = null, renderer = null, scene = null, camera = null, GEOM = null, placeholder = null;
+// ---------- the past: drawings in the sky that fall into a wall ----------
+// Cai 10-13: the past is a wall of thumbnails stacked at the bottom of the screen, newest day
+// nearest today. A drawing whose spot on the wall is still high up waits small and scattered
+// in the sky at the top of the screen; as the page scrolls up its spot comes down, and it
+// falls into place like a brick in a falling-block game. Scrolling down lifts the bricks back
+// into the sky. The fall is scrubbed by the scroll, each brick with its own start and finish
+// so they land one after another, and eased toward the target so it never jerks.
+const pastEl = $('#past'), lineEl = $('#centre');
 let pastDays = [], sessionIndex = new Map(), posts = [];
-const clusters = [];               // { k, date, sessions, items, y0, H, seed, planes:null|[], cap:null|el }
-let worldTop = 0;                  // world y of the top of the last built cluster
-let wpp = 1;                       // world units per CSS pixel at the focal plane (z = 0)
-const cam = { x: 0, y: 0, tx: 0, ty: 0, drift: { x: 0, y: 0 }, mouse: { x: 0, y: 0 }, touch: false };
-const textures = new Map();
-let inFlight = 0;
+let days = [];                     // { date, sessions, items, el, cap, bricks, last }
+let bricks = [];                   // { el, slot, item, top, cx, w, h, A, B, sky, u, drawn }
+let laps = 0;
+const MAX_LAPS = 8;
+const GAP = 6;
+const rowH = () => innerWidth < 600 ? 92 : 128;
+const wallW = () => Math.min(innerWidth - 32, 1100);
+const fall = window.gsap ? window.gsap.parseEase('power2.inOut') : (t) => t;
+const clamp01 = (t) => t < 0 ? 0 : t > 1 ? 1 : t;
 
-// The field is as wide as the view at the farthest depth a drawing can still be seen
-// (where depthFade^2 drops under 0.05), so every depth is filled edge to edge as in the
-// demo's endless chunks; drawings close to the lens mostly land off to the sides.
-const FARTHEST = DEPTH_FADE_END - Math.sqrt(0.05) * (DEPTH_FADE_END - DEPTH_FADE_START);
-function slabWidth() { return visH(FARTHEST) * (innerWidth / innerHeight); }
-// The demo's density on average: (110^3 / 5) units of space per drawing. A day packs its
-// drawings into 65% of its share of height and leaves 35% as air, so days read as clusters
-// while the field as a whole keeps the demo's density.
-function dayShare(n) {
-  const perDrawing = (CHUNK_SIZE ** 3 / PLANES_PER_CHUNK) / (slabWidth() * CHUNK_SIZE * DEPTH_CHUNKS);
-  const total = Math.max(16, n * perDrawing);
-  return { H: total * 0.65, gap: total * 0.35 };
-}
-
-function addCluster() {
-  const k = clusters.length, D = pastDays.length;
-  const day = pastDays[k % D], lap = Math.floor(k / D);
+function dayItems(day, lap) {
   const items = [];
   for (const s of day.sessions) {
     const g = sessionIndex.get(s) + lap * sessionIndex.size;
@@ -312,274 +289,141 @@ function addCluster() {
     const n = 3 + (g % 4);   // 3 to 6 drawings per session
     for (const im of post.imgs.slice(0, n)) items.push({ src: im.src, w: im.w, h: im.h, post, session: s });
   }
-  const { H, gap } = dayShare(items.length);
-  const c = { k, lap, date: day.date, sessions: day.sessions, items, y0: worldTop + (k === 0 ? 14 : gap), H, seed: hashString(`${day.date}#${lap}`), planes: null, cap: null };
-  worldTop = c.y0 + H;
-  clusters.push(c);
-  return c;
+  return items;
 }
 
-function buildPlanes(c) {
-  const vw = innerWidth / innerHeight;
-  c.planes = c.items.map((it, i) => {
-    const s = c.seed + i * 1000, r = (n) => seededRandom(s + n);
-    const size = (12 + r(4) * 8) * SIZE_SCALE;                    // the demo's plane size (12 to 20 units), scaled
-    // depth: from just in front of the lens to two chunks out, as in the demo. A day's first
-    // drawing is anchored at the bottom of its cluster at mid-depth, so the line always has
-    // that day's work right above it (on a phone the demo's density spreads a day over two screens).
-    const first = i === 0;
-    const z = first ? 40 - 0.35 * CHUNK_SIZE * DEPTH_CHUNKS : 40 - r(2) * CHUNK_SIZE * DEPTH_CHUNKS;
-    const d = CAMERA_Z - z;
-    const aspect = it.w / it.h;
-    // x is uniform across the field whatever the depth, as in the demo's chunks, so a drawing
-    // close to the lens is usually off to one side and the middle stays airy
-    const x = first ? (r(0) - 0.5) * Math.max(0, visH(d) * vw - size * aspect) * 0.8 : (r(0) - 0.5) * slabWidth();
-    const y = c.y0 + size / 2 + (first ? 0 : r(1)) * Math.max(0, c.H - size);
-    const mat = new THREE_.MeshBasicMaterial({ color: placeholder.clone(), transparent: true, opacity: 0, side: THREE_.DoubleSide, depthWrite: false });
-    const mesh = new THREE_.Mesh(GEOM, mat);
-    mesh.position.set(x, y, z);
-    mesh.scale.set(size * aspect, size, 1);
-    mesh.visible = false;
-    const p = { mesh, mat, item: it, cluster: c, opacity: 0, loaded: false, hidden: false, z };
-    mesh.userData.p = p;
-    scene.add(mesh);
-    requestTexture(p);
-    return p;
-  });
-}
-function dropPlanes(c) {
-  for (const p of c.planes) { scene.remove(p.mesh); p.mat.dispose(); p.removed = true; const t = textures.get(p.item.src); t?.waiters.delete(p); }
-  c.planes = null;
-  if (c.cap) { c.cap.remove(); c.cap = null; }
-}
-
-// textures: nearest first, six at a time, released when no plane near the camera uses them
-function requestTexture(p) {
-  const url = p.item.src;
-  let t = textures.get(url);
-  if (!t) { t = { tex: null, state: 'queued', waiters: new Set() }; textures.set(url, t); }
-  if (t.state === 'ready') { applyTex(p, t.tex); return; }
-  t.waiters.add(p); pump();
-}
-function pump() {
-  while (inFlight < 6) {
-    let best = null, bestUrl = null, bestD = Infinity;
-    for (const [url, t] of textures) {
-      if (t.state !== 'queued' || !t.waiters.size) continue;
-      let dmin = Infinity;
-      for (const p of t.waiters) dmin = Math.min(dmin, Math.abs(p.mesh.position.y - cam.y) + Math.abs(p.z) * 0.2);
-      if (dmin < bestD) { bestD = dmin; best = t; bestUrl = url; }
+// justified rows, no overlap; the short row goes on top of the day, the way a stack is built
+function rowsFor(items) {
+  const W = wallW(), H = rowH(), rows = [];
+  let row = [], sum = 0;
+  for (const it of items) {
+    row.push(it); sum += H * it.w / it.h;
+    if (sum + GAP * (row.length - 1) >= W) {
+      const k = (W - GAP * (row.length - 1)) / sum;
+      rows.push(row.map((x) => ({ it: x, w: H * x.w / x.h * k, h: H * k })));
+      row = []; sum = 0;
     }
-    if (!best) return;
-    best.state = 'loading'; inFlight++;
-    const img = new Image(); img.decoding = 'async'; img.src = bestUrl;
-    const t = best;
-    img.decode().then(() => {
-      const tex = new THREE_.Texture(img);
-      tex.colorSpace = THREE_.SRGBColorSpace; tex.minFilter = THREE_.LinearMipmapLinearFilter; tex.magFilter = THREE_.LinearFilter;
-      tex.generateMipmaps = true; tex.anisotropy = 4; tex.needsUpdate = true;
-      t.tex = tex; t.state = 'ready';
-      for (const p of t.waiters) applyTex(p, tex);
-      t.waiters.clear();
-    }).catch(() => { t.state = 'error'; t.waiters.clear(); }).finally(() => { inFlight--; pump(); });
+  }
+  if (row.length) rows.push(row.map((x) => ({ it: x, w: H * x.w / x.h, h: H })));
+  return rows.reverse();
+}
+
+let lazy = null;
+function buildDay(d) {
+  const block = h('div', { class: 'wday' });
+  const rows = rowsFor(d.items);
+  d.bricks = [];
+  rows.forEach((row, ri) => {
+    const r = h('div', { class: 'wrow' });
+    for (const { it, w, h: hh } of row) {
+      const slot = h('div', { class: 'slot' });
+      slot.style.width = `${w.toFixed(1)}px`; slot.style.height = `${hh.toFixed(1)}px`;
+      const btn = h('button', { type: 'button', class: 'brick', 'aria-label': `Drawing, ${it.session.title}, ${longDate(d.date)}. Demo: Cai's sketchbook` },
+        h('img', { alt: '', width: it.w, height: it.h, 'data-src': it.src, decoding: 'async' }));
+      btn.addEventListener('click', () => showImage(btn.getBoundingClientRect(), it, btn));
+      slot.append(btn); r.append(slot);
+      const b = { el: btn, slot, item: it, w, h: hh, u: reduced ? 1 : 0, drawn: -1, last: ri === rows.length - 1 };
+      d.bricks.push(b);
+      lazy?.observe(slot);
+    }
+    block.append(r);
+  });
+  d.cap = h('button', { type: 'button', class: 'daycap ui', text: shortDate(d.date),
+    'aria-label': `${longDate(d.date)}: ${d.sessions.map((s) => s.title).join(', ')}. Open the day` });
+  d.cap.addEventListener('click', () => showDay(d, d.cap));
+  block.append(d.cap);
+  d.el = block;
+  return block;
+}
+
+// seeded per brick: where it waits in the sky, and the stretch of scroll its fall takes
+function arm(b, i) {
+  const r = (n) => seededRandom(hashString(b.item.src) + i * 31 + n);
+  b.B = 0.36 + r(1) * 0.16;          // landed once its spot's centre is this far down the screen
+  b.A = b.B - 0.78;                  // and fully in the sky this far up
+  b.sky = { dx: (r(2) - 0.5) * 0.5, y: 0.06 + r(3) * 0.32, s: 0.3 + r(4) * 0.2, rot: (r(5) - 0.5) * 16 };
+}
+const seededRandom = (seed) => { const x = Math.sin(seed * 9999) * 10000; return x - Math.floor(x); };
+const hashString = (str) => { let v = 0; for (let i = 0; i < str.length; i++) v = ((v << 5) - v + str.charCodeAt(i)) | 0; return Math.abs(v); };
+
+function measure() {
+  const sy = scrollY;
+  for (const b of bricks) {
+    const r = b.slot.getBoundingClientRect();
+    b.top = r.top + sy; b.cx = r.left + r.width / 2;
   }
 }
-function applyTex(p, tex) { if (p.removed) return; p.mat.map = tex; p.mat.color.set('#ffffff'); p.mat.needsUpdate = true; p.loaded = true; }
-function releaseTextures() {
-  const used = new Set();
-  for (const c of clusters) if (c.planes) for (const p of c.planes) used.add(p.item.src);
-  for (const [url, t] of textures) if (!used.has(url) && t.state === 'ready') { t.tex.dispose(); textures.delete(url); }
+
+function buildWall() {
+  const D = pastDays.length;
+  days = []; bricks = [];
+  const frag = [];
+  for (let lap = laps; lap >= 0; lap--)         // oldest lap on top
+    for (let i = D - 1; i >= 0; i--) {          // oldest day on top, newest nearest today
+      const d = { ...pastDays[i], lap, items: dayItems(pastDays[i], lap) };
+      frag.push(buildDay(d)); days.push(d);
+    }
+  pastEl.replaceChildren(...frag);
+  bricks = days.flatMap((d) => d.bricks);
+  bricks.forEach(arm);
+  measure();
 }
 
-function layoutSpacer() {
-  wpp = visH(CAMERA_Z) / innerHeight;
-  pastEl.style.height = `${Math.ceil(worldTop / wpp + innerHeight * 0.6)}px`;
-}
-function growSpacer() {
+// one more lap of the two months on top when the reader nears the top of the wall
+function growWall() {
+  if (laps >= MAX_LAPS || !pastDays.length) return;
+  laps++;
   const before = pastEl.offsetHeight;
-  layoutSpacer();
+  const D = pastDays.length, frag = [], added = [];
+  for (let i = D - 1; i >= 0; i--) {
+    const d = { ...pastDays[i], lap: laps, items: dayItems(pastDays[i], laps) };
+    frag.push(buildDay(d)); added.push(d);
+  }
+  pastEl.prepend(...frag);
   const dh = pastEl.offsetHeight - before;
-  if (dh > 0) scrollTo(0, scrollY + dh);   // new days go on top: keep the view where it is
+  scrollTo(0, scrollY + dh);
+  days = [...added, ...days];
+  const fresh = added.flatMap((d) => d.bricks);
+  fresh.forEach(arm);
+  bricks = [...fresh, ...bricks];
+  measure();
 }
 
-// the camera's target: how far the centre line sits below the middle of the screen
+function tick() {
+  if (open) return;
+  const vh = innerHeight, vw = innerWidth, sy = scrollY;
+  if (sy < vh * 1.5) growWall();
+  for (const b of bricks) {
+    const cy = b.top + b.h / 2 - sy;
+    const target = reduced ? 1 : clamp01((cy - b.A * vh) / ((b.B - b.A) * vh));
+    if (cy > vh * 2 && b.drawn === 1 && target === 1) continue;     // landed far below: nothing to do
+    if (cy < (b.A - 0.6) * vh && b.drawn === 0 && target === 0) continue;   // gone in the sky
+    b.u += (target - b.u) * 0.14;
+    if (Math.abs(target - b.u) < 0.002) b.u = target;
+    const u = b.u;
+    if (u === b.drawn && (u === 0 || u === 1)) continue;
+    if (u === 1) { b.el.style.transform = ''; b.el.style.opacity = ''; b.el.style.visibility = ''; b.el.style.pointerEvents = ''; b.drawn = 1; continue; }
+    if (u === 0) { b.el.style.visibility = 'hidden'; b.drawn = 0; continue; }
+    const e = fall(u), k = 1 - e;
+    const skyX = Math.min(vw - 30, Math.max(30, b.cx + b.sky.dx * vw)), skyY = b.sky.y * vh;
+    const dx = (skyX - b.cx) * k, dy = (skyY - cy) * k;
+    const s = b.sky.s + (1 - b.sky.s) * e;
+    b.el.style.visibility = ''; b.el.style.pointerEvents = 'none';   // only landed drawings take taps
+    b.el.style.opacity = Math.min(1, u / 0.12).toFixed(3);
+    b.el.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) rotate(${(b.sky.rot * k).toFixed(2)}deg) scale(${s.toFixed(3)})`;
+    b.drawn = u;
+  }
+  // a day's date shows once its bottom row has landed
+  for (const d of days) {
+    const row = d.bricks.filter((b) => b.last);
+    const u = row.reduce((a, b) => a + b.u, 0) / (row.length || 1);
+    const o = clamp01((u - 0.6) / 0.4);
+    if (d.capO !== o) { d.cap.style.opacity = o.toFixed(2); d.capO = o; }
+  }
+}
+
+// the line's distance below the middle of the screen
 function lineOffsetPx() { const r = lineEl.getBoundingClientRect(); return r.top + r.height / 2 - innerHeight / 2; }
-
-function screenRect(p) {
-  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-  const v = new THREE_.Vector3(), hw = p.mesh.scale.x / 2, hh = p.mesh.scale.y / 2;
-  for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
-    v.set(p.mesh.position.x + sx * hw, p.mesh.position.y + sy * hh, p.z).project(camera);
-    const px = (v.x + 1) / 2 * innerWidth, py = (1 - v.y) / 2 * innerHeight;
-    x0 = Math.min(x0, px); y0 = Math.min(y0, py); x1 = Math.max(x1, px); y1 = Math.max(y1, py);
-  }
-  return { left: x0, top: y0, width: x1 - x0, height: y1 - y0 };
-}
-
-const raycaster = { r: null, v: null };
-function pickAt(x, y) {
-  if (!raycaster.r) { raycaster.r = new THREE_.Raycaster(); raycaster.v = new THREE_.Vector2(); }
-  raycaster.v.set((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1);
-  raycaster.r.setFromCamera(raycaster.v, camera);
-  const meshes = [];
-  for (const c of clusters) if (c.planes) for (const p of c.planes) if (p.mesh.visible && p.loaded && p.opacity > 0.3) meshes.push(p.mesh);
-  const hit = raycaster.r.intersectObjects(meshes, false)[0];
-  return hit ? hit.object.userData.p : null;
-}
-function selectPlane(p) {
-  const origin = screenRect(p);
-  p.hidden = true; p.mesh.visible = false;
-  showImage(origin, p.item, null, () => { p.hidden = false; });
-}
-
-function placeCaption(c, v) {
-  if (!c.cap) {
-    c.cap = h('button', { type: 'button', class: 'daycap ui', text: parse(c.date).toLocaleDateString('en-CA', { weekday: 'short', month: 'short', day: 'numeric' }),
-      'aria-label': `${longDate(c.date)}: ${c.sessions.map((s) => s.title).join(', ')}. Open the day` });
-    c.cap.addEventListener('click', () => showDay(c, c.cap));
-    c.cap.addEventListener('focus', () => {   // bring a focused day into view
-      const off = (c.y0 + c.H / 2 - cam.y) / wpp;
-      if (Math.abs(off) > innerHeight * 0.35) scrollTo({ top: scrollY - off, behavior: reduced ? 'auto' : 'smooth' });
-    });
-    // DOM order newest first, so Tab walks back in time
-    const next = clusters.slice(0, c.k).reverse().find((o) => o.cap);
-    if (next) next.cap.after(c.cap); else capsLayer.prepend(c.cap);
-  }
-  // the caption sits under the day's cluster, on the focal plane, but never on a drawing:
-  // it slides along its row (and a little up or down) to the first clear spot, else it hides
-  v.set(-(visH(CAMERA_Z) * innerWidth / innerHeight) / 2 * 0.86, c.y0 - 2, 0).project(camera);
-  const px0 = (v.x + 1) / 2 * innerWidth, py0 = (1 - v.y) / 2 * innerHeight;
-  const w = c.cap.offsetWidth || 90, hgt = c.cap.offsetHeight || 32, pad = 4;
-  const hits = (x, y) => frameRects.some((r) => x < r.x1 + pad && x + w > r.x0 - pad && y < r.y1 + pad && y + hgt > r.y0 - pad);
-  let spot = null;
-  for (const dy of [0, 22, -22, 44, -44]) {
-    const y = py0 + dy;
-    for (let x = Math.max(12, px0); x <= innerWidth - w - 12 && !spot; x += 14) if (!hits(x, y)) spot = [x, y];
-    for (let x = Math.max(12, px0) - 14; x >= 12 && !spot; x -= 14) if (!hits(x, y)) spot = [x, y];
-    if (spot) break;
-  }
-  const focused = c.cap === document.activeElement;
-  if (!spot && !focused) { c.cap.style.visibility = 'hidden'; return; }
-  c.cap.style.visibility = '';
-  const [px, py] = spot || [Math.max(12, px0), py0];
-  c.cap.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px)`;
-}
-
-let frameRects = [];
-if (location.search.includes('debug')) window.__biCaps = () => {
-  let shown = 0, bad = 0;
-  for (const el of document.querySelectorAll('.daycap')) {
-    if (el.style.visibility === 'hidden') continue;
-    const r = el.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) continue;
-    shown++;
-    if (frameRects.some((q) => r.left < q.x1 && r.right > q.x0 && r.top < q.y1 && r.bottom > q.y0)) bad++;
-  }
-  return [shown, bad];
-};
-function frame() {
-  requestAnimationFrame(frame);
-  const off = lineOffsetPx();
-  cam.ty = off * wpp;
-  if (reduced) { cam.x = cam.tx; cam.y = cam.ty; }
-  else { cam.x += (cam.tx - cam.x) * VELOCITY_LERP; cam.y += (cam.ty - cam.y) * VELOCITY_LERP; }
-  if (!reduced && !cam.touch && !draggingX) {
-    cam.drift.x += (cam.mouse.x * DRIFT - cam.drift.x) * DRIFT_LERP;
-    cam.drift.y += (cam.mouse.y * DRIFT - cam.drift.y) * DRIFT_LERP;
-  } else if (cam.touch || reduced) { cam.drift.x *= 0.88; cam.drift.y *= 0.88; }
-  if (open) return;   // keeps rendering below the line: the upcoming tiles float in the same space
-  camera.position.set(cam.x + cam.drift.x, cam.y + cam.drift.y, CAMERA_Z);
-
-  // endless: when the camera nears the top of what is built, add the next lap
-  const view = visH(DEPTH_FADE_END);
-  while (pastDays.length && worldTop < cam.y + view * 1.5) addCluster();
-  if (pastEl.offsetHeight < worldTop / wpp + innerHeight * 0.3) growSpacer();
-
-  const v = new THREE_.Vector3();
-  const near = view * 1.2, far = view * 1.8;
-  for (const c of clusters) {
-    const dy = Math.max(c.y0 - cam.y, cam.y - (c.y0 + c.H), 0);
-    if (dy < near && !c.planes) buildPlanes(c);
-    else if (dy > far && c.planes) dropPlanes(c);
-    if (!c.planes) continue;
-    for (const p of c.planes) {
-      const depth = CAMERA_Z - p.z;
-      const depthFade = depth <= DEPTH_FADE_START ? 1 : Math.max(0, 1 - (depth - DEPTH_FADE_START) / (DEPTH_FADE_END - DEPTH_FADE_START));
-      const target = depthFade * depthFade;
-      p.opacity = reduced ? target : p.opacity + (target - p.opacity) * OPACITY_LERP;
-      const opaque = p.opacity > 0.99;
-      p.mat.opacity = opaque ? 1 : p.opacity; p.mat.depthWrite = opaque;
-      p.mesh.visible = p.opacity > INVIS && !p.hidden;
-    }
-  }
-  // screen boxes of every drawing that shows, so captions can keep off them
-  frameRects = [];
-  for (const c of clusters) if (c.planes) for (const p of c.planes) {
-    if (!p.mesh.visible || p.opacity < 0.05) continue;
-    const r = screenRect(p);
-    if (r.left + r.width < 0 || r.left > innerWidth || r.top + r.height < 0 || r.top > innerHeight) continue;
-    frameRects.push({ x0: r.left, y0: r.top, x1: r.left + r.width, y1: r.top + r.height });
-  }
-  for (const c of clusters) {
-    if (!c.planes) continue;
-    const capOn = Math.abs(c.y0 - cam.y) < visH(CAMERA_Z) * 0.75;
-    if (capOn) placeCaption(c, v); else if (c.cap && c.cap !== document.activeElement) { c.cap.remove(); c.cap = null; }
-  }
-  if (++frameCount % 120 === 0) releaseTextures();
-  renderer.render(scene, camera);
-}
-let frameCount = 0;
-if (location.search.includes('debug')) window.__biCount = () => {   // same metric as the demo count: any part on screen, faded >= 0.05
-  let n = 0, crisp = 0; const t = Math.tan(Math.PI / 6), asp = innerWidth / innerHeight;
-  for (const c of clusters) if (c.planes) for (const p of c.planes) {
-    const d = CAMERA_Z - p.z; if (d < 1) continue;
-    const f = d <= DEPTH_FADE_START ? 1 : Math.max(0, 1 - (d - DEPTH_FADE_START) / (DEPTH_FADE_END - DEPTH_FADE_START)); if (f * f < 0.05) continue;
-    const hh = d * t, hw = hh * asp, x = p.mesh.position.x, y = p.mesh.position.y, w = p.mesh.scale.x, hgt = p.mesh.scale.y;
-    if (x + w / 2 < cam.x - hw || x - w / 2 > cam.x + hw || y + hgt / 2 < cam.y - hh || y - hgt / 2 > cam.y + hh) continue;
-    n++; if (d <= DEPTH_FADE_START) crisp++;
-  }
-  return [n, crisp];
-};
-if (location.search.includes('debug')) window.__bi = () => {
-  let built = 0, vis = 0, crisp = 0;
-  const f = new THREE_.Frustum().setFromProjectionMatrix(new THREE_.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
-  for (const c of clusters) if (c.planes) for (const p of c.planes) { built++; if (p.mesh.visible && f.containsPoint(p.mesh.position)) { vis++; if (p.opacity > 0.5) crisp++; } }
-  return { total: clusters.reduce((a, c) => a + c.items.length, 0), tx: cam.tx, point: (() => { for (const c of clusters) if (c.planes) for (const p of c.planes) { if (!p.loaded || p.opacity < 0.9 || !p.mesh.visible) continue; const r = screenRect(p); const x = r.left + r.width / 2, y = r.top + r.height / 2; if (x > 30 && x < innerWidth - 30 && y > 30 && y < innerHeight - 140 && pickAt(x, y) === p) return { x, y }; } return null; })(), clusters: clusters.length, H: clusters.slice(0, 5).map((c) => [c.items.length, Math.round(c.H)]), built, vis, crisp, camY: Math.round(cam.y), worldTop: Math.round(worldTop) };
-};
-
-// ---------- pointer: tap a drawing, drag sideways (bounded), drift with the mouse ----------
-let draggingX = false;
-function setupPointer(canvas) {
-  let down = null;
-  const room = () => visH(CAMERA_Z) * (innerWidth / innerHeight) * 0.12;
-  canvas.addEventListener('pointerdown', (e) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    cam.touch = e.pointerType !== 'mouse';
-    down = { x: e.clientX, y: e.clientY, t: performance.now(), tx: cam.tx, horiz: null, max: 0, id: e.pointerId };
-  });
-  canvas.addEventListener('pointermove', (e) => {
-    if (e.pointerType === 'mouse') { cam.mouse.x = (e.clientX / innerWidth) * 2 - 1; cam.mouse.y = -(e.clientY / innerHeight) * 2 + 1; }
-    if (!down || e.pointerId !== down.id) {
-      if (e.pointerType === 'mouse') canvas.style.cursor = pickAt(e.clientX, e.clientY) ? 'pointer' : 'grab';
-      return;
-    }
-    const dx = e.clientX - down.x, dy = e.clientY - down.y;
-    down.max = Math.max(down.max, Math.hypot(dx, dy));
-    if (down.horiz === null && down.max > 6) down.horiz = Math.abs(dx) > Math.abs(dy);
-    if (down.horiz) { draggingX = true; const R = room(); cam.tx = Math.max(-R, Math.min(R, down.tx - dx * wpp)); }
-  });
-  const end = (e, cancelled) => {
-    if (!down || e.pointerId !== down.id) return;
-    const tap = !cancelled && down.max < 6 && performance.now() - down.t < 300;
-    down = null; draggingX = false;
-    if (tap) { const p = pickAt(e.clientX, e.clientY); if (p) selectPlane(p); }
-  };
-  canvas.addEventListener('pointerup', (e) => end(e, false));
-  canvas.addEventListener('pointercancel', (e) => end(e, true));
-  canvas.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { cam.mouse.x = 0; cam.mouse.y = 0; } });
-  canvas.addEventListener('wheel', (e) => {
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) { e.preventDefault(); const R = room(); cam.tx = Math.max(-R, Math.min(R, cam.tx + e.deltaX * wpp)); }
-  }, { passive: false });
-}
 
 // ---------- landing, cues ----------
 let landingY = 0, userMoved = false;
@@ -592,21 +436,16 @@ addEventListener('scroll', () => {
   if (userMoved && Math.abs(scrollY - landingY) > 140) document.body.classList.add('cues-off');
 }, { passive: true });
 
-let lastW = innerWidth, lastH = innerHeight, rz = 0;
+let lastW = innerWidth, rz = 0;
 addEventListener('resize', () => {
   clearTimeout(rz);
   rz = setTimeout(() => {
-    if (!renderer) return;
-    renderer.setSize(innerWidth, innerHeight);
-    camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
-    if (innerWidth === lastW && Math.abs(innerHeight - lastH) < 120) { lastH = innerHeight; layoutSpacer(); return; }   // mobile toolbar: keep the layout
-    lastW = innerWidth; lastH = innerHeight;
-    const y = cam.ty;
-    for (const c of clusters) if (c.planes) dropPlanes(c);
-    clusters.length = 0; worldTop = 0;
-    while (pastDays.length && worldTop < y + visH(DEPTH_FADE_END) * 2) addCluster();
-    layoutSpacer();
-    scrollTo(0, scrollY + lineOffsetPx() - y / wpp);
+    if (!bricks.length) return;
+    if (innerWidth === lastW) { measure(); return; }   // mobile toolbar: rows stay, spots re-read
+    lastW = innerWidth;
+    const off = lineOffsetPx();
+    buildWall();
+    if (!userMoved) centre(); else scrollTo(0, scrollY + lineOffsetPx() - off);
   }, 200);
 });
 
@@ -643,47 +482,31 @@ async function boot() {
   pastDays = [...byDay].map(([date, sessions]) => ({ date, sessions: sessions.slice().reverse() }));   // a day reads in clock order
   if (!pastDays.length || !posts.length) { pastDays = []; $('#cue-up').hidden = true; }
 
-  try {
-    THREE_ = await import('./vendor/three.module.min.js');
-    renderer = new THREE_.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
-  } catch (e) { renderer = null; }
-  if (renderer && pastDays.length) {
-    const touch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, touch ? 1.25 : 1.5));   // the demo's dpr caps
-    renderer.setSize(innerWidth, innerHeight);
-    renderer.domElement.className = 'field-canvas';
-    field.prepend(renderer.domElement);
-    scene = new THREE_.Scene();
-    scene.background = new THREE_.Color('#ffffff');
-    scene.fog = new THREE_.Fog('#ffffff', FOG_NEAR, FOG_FAR);
-    camera = new THREE_.PerspectiveCamera(FOV, innerWidth / innerHeight, NEAR, FAR);
-    camera.position.set(0, 0, CAMERA_Z);
-    GEOM = new THREE_.PlaneGeometry(1, 1);
-    placeholder = new THREE_.Color('#f0eeec');
-    for (let i = 0; i < pastDays.length; i++) addCluster();
-    layoutSpacer();
-    setupPointer(renderer.domElement);
+  if (pastDays.length) {
+    // pictures load as their spot nears the screen (a screen's worth above and below)
+    lazy = new IntersectionObserver((entries) => {
+      for (const en of entries) if (en.isIntersecting) {
+        const img = en.target.querySelector('img');
+        if (img?.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+        lazy.unobserve(en.target);
+      }
+    }, { rootMargin: '120% 0px 120% 0px' });
+    buildWall();
   } else {
-    pastEl.style.height = '0px';
+    $('#cue-up').hidden = true;
   }
 
   centre();
-  document.fonts?.ready.then(() => { if (!userMoved) centre(); });
-  if (renderer && pastDays.length) {
-    cam.y = cam.ty = lineOffsetPx() * wpp;
-    requestAnimationFrame(frame);
-    // the loader leaves once the drawings on the first screen are decoded (and one pass has played)
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-    const firstUrls = new Set();
-    for (const c of clusters) if (c.planes) for (const p of c.planes) {
-      const r = screenRect(p);
-      if (r.top + r.height > 0 && r.top < innerHeight && r.left + r.width > 0 && r.left < innerWidth) firstUrls.add(p.item.src);
-    }
-    const t0 = performance.now();
-    while (performance.now() - t0 < 8000) {
-      if ([...firstUrls].every((u) => { const t = textures.get(u); return !t || t.state === 'ready' || t.state === 'error'; })) break;
-      await new Promise((r) => setTimeout(r, 50));
-    }
+  measure();
+  document.fonts?.ready.then(() => { if (!userMoved) { centre(); measure(); } });
+  if (bricks.length) {
+    (window.gsap ? window.gsap.ticker.add(tick) : (function loop() { tick(); requestAnimationFrame(loop); })());
+    // the loader leaves once the newest drawings, the ones nearest today, are decoded
+    const near = bricks.slice(-24).map((b) => b.el.querySelector('img'));
+    await Promise.race([
+      Promise.all(near.map((img) => (img.dataset.src ? (img.src = img.dataset.src, delete img.dataset.src) : 0, img.decode().catch(() => {})))),
+      new Promise((r) => setTimeout(r, 6000)),
+    ]);
   }
   performance.mark?.('home-ready');
   window.BILoader?.ready();

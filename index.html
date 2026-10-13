@@ -19,15 +19,10 @@
 <div id="bi-loader" aria-hidden="true"><canvas></canvas></div>
 <script src="assets/bi-loader.js"></script>
 
-<!-- the past: the demo's 3D field, fixed behind the page; captions ride on top -->
-<div class="field" id="field" aria-hidden="false">
-  <div class="field-caps" id="field-caps" aria-label="Past days, newest first"></div>
-</div>
-
 <main>
   <h1 class="sr-only">Basic Inquiry, the Vancouver Life Drawing Society</h1>
-  <!-- scroll room for the past: its height is the field's height -->
-  <div class="past" id="past" aria-hidden="true"></div>
+  <!-- the past: a wall of drawings, oldest at the top, newest just above today -->
+  <section class="wall" id="past" aria-label="Past sessions, newest nearest today"></section>
 
   <!-- the centre line, where the load lands -->
   <div class="centre ui" id="centre">
@@ -87,6 +82,7 @@
       d.toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' }) + '</span>';
   })();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script type="module" src="assets/home.js"></script>
 </body>
 </html>

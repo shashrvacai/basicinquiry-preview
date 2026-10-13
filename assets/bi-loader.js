@@ -289,7 +289,8 @@ function paint(x0,y0,x1,y1,weight,density,dark,alpha){
   // weight drives the brush width; the hairlines are genuinely thin
   const w = params.width * params.scale *
             (params.taperMin + (1 - params.taperMin) * weight / 0.7)
-            * (1 + 0.55*dark);
+            * (1 + 0.55*dark)
+            * (innerWidth < 600 ? 0.5 : 1);   // Cai 10-13: half the brush on phones
 
   const speed = Math.min(1, dist/12) * (1 - 0.85*dark);
   const starve = 1 - params.dryness * speed;
