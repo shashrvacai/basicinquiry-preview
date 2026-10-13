@@ -336,12 +336,16 @@ function buildDay(d) {
   return block;
 }
 
-// seeded per brick: where it waits in the sky, and the stretch of scroll its fall takes
+// seeded per brick: where it waits in the sky, and the stretch of scroll its fall takes.
+// Cai 10-13: everything below the middle of the screen is aligned; above, the drawings hold
+// still high up in the sky and drop in over a short stretch, not drift down the whole way.
+const FALL = 0.3;                    // the fall takes this much of a screen of scroll
+const SKY = 1.1;                     // spots this far above the fall still show their drawing in the sky
 function arm(b, i) {
   const r = (n) => seededRandom(hashString(b.item.src) + i * 31 + n);
-  b.B = 0.36 + r(1) * 0.16;          // landed once its spot's centre is this far down the screen
-  b.A = b.B - 0.78;                  // and fully in the sky this far up
-  b.sky = { dx: (r(2) - 0.5) * 0.5, y: 0.06 + r(3) * 0.32, s: 0.3 + r(4) * 0.2, rot: (r(5) - 0.5) * 16 };
+  b.B = 0.36 + r(1) * 0.1;           // landed once its spot's centre is this far down the screen (by 46%)
+  b.A = b.B - FALL;                  // starts to fall here
+  b.sky = { dx: (r(2) - 0.5) * 0.5, y: 0.04 + r(3) * 0.2, s: 0.28 + r(4) * 0.14, rot: (r(5) - 0.5) * 16 };
 }
 const seededRandom = (seed) => { const x = Math.sin(seed * 9999) * 10000; return x - Math.floor(x); };
 const hashString = (str) => { let v = 0; for (let i = 0; i < str.length; i++) v = ((v << 5) - v + str.charCodeAt(i)) | 0; return Math.abs(v); };
@@ -395,23 +399,26 @@ function tick() {
   if (sy < vh * 1.5) growWall();
   for (const b of bricks) {
     const cy = b.top + b.h / 2 - sy;
-    const target = reduced ? 1 : clamp01((cy - b.A * vh) / ((b.B - b.A) * vh));
+    const target = reduced ? 1 : clamp01((cy - b.A * vh) / (FALL * vh));
+    const sky = reduced ? 1 : clamp01((cy - (b.A - SKY) * vh) / (0.25 * vh));   // fades in high up, far end of the sky
     if (cy > vh * 2 && b.drawn === 1 && target === 1) continue;     // landed far below: nothing to do
-    if (cy < (b.A - 0.6) * vh && b.drawn === 0 && target === 0) continue;   // gone in the sky
-    b.u += (target - b.u) * 0.14;
+    if (sky === 0 && b.drawn === 0) { b.u = 0; continue; }          // not in the sky yet
+    b.u += (target - b.u) * 0.22;
     if (Math.abs(target - b.u) < 0.002) b.u = target;
     const u = b.u;
-    if (u === b.drawn && (u === 0 || u === 1)) continue;
-    if (u === 1) { b.el.style.transform = ''; b.el.style.opacity = ''; b.el.style.visibility = ''; b.el.style.pointerEvents = ''; b.drawn = 1; continue; }
-    if (u === 0) { b.el.style.visibility = 'hidden'; b.drawn = 0; continue; }
+    if (u === 1) {
+      if (b.drawn !== 1) { b.el.style.transform = ''; b.el.style.opacity = ''; b.el.style.visibility = ''; b.el.style.pointerEvents = ''; b.el.classList.remove('flying'); b.drawn = 1; }
+      continue;
+    }
+    if (sky === 0) { b.el.style.visibility = 'hidden'; b.drawn = 0; continue; }
     const e = fall(u), k = 1 - e;
     const skyX = Math.min(vw - 30, Math.max(30, b.cx + b.sky.dx * vw)), skyY = b.sky.y * vh;
     const dx = (skyX - b.cx) * k, dy = (skyY - cy) * k;
     const s = b.sky.s + (1 - b.sky.s) * e;
-    b.el.style.visibility = ''; b.el.style.pointerEvents = 'none';   // only landed drawings take taps
-    b.el.style.opacity = Math.min(1, u / 0.12).toFixed(3);
+    if (b.drawn === 1 || b.drawn === 0 || b.drawn === -1) { b.el.style.visibility = ''; b.el.style.pointerEvents = 'none'; b.el.classList.add('flying'); }   // only landed drawings take taps
+    b.el.style.opacity = (u > 0 ? 1 : sky).toFixed(3);
     b.el.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) rotate(${(b.sky.rot * k).toFixed(2)}deg) scale(${s.toFixed(3)})`;
-    b.drawn = u;
+    b.drawn = u + sky * 1e-4;   // never exactly 0 or 1 while in the air
   }
   // a day's date shows once its bottom row has landed
   for (const d of days) {
