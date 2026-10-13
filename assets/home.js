@@ -278,7 +278,7 @@ const MAX_LAPS = 8;
 const GAP = 6;
 const rowH = () => innerWidth < 600 ? 92 : 128;
 const wallW = () => Math.min(innerWidth - 32, 1100);
-const fall = window.gsap ? window.gsap.parseEase('power2.inOut') : (t) => t;
+const fall = window.gsap ? window.gsap.parseEase('power2.out') : (t) => t;   // fast from afar, settling as it arrives
 const clamp01 = (t) => t < 0 ? 0 : t > 1 ? 1 : t;
 
 function dayItems(day, lap) {
@@ -336,22 +336,25 @@ function buildDay(d) {
   return block;
 }
 
-// seeded per brick: where it waits in the sky, and the stretch of scroll its fall takes.
-// Cai 10-13: everything below the middle of the screen is aligned; above, the drawings hold
-// still high up in the sky and drop in over a short stretch, not drift down the whole way.
-const FALL = 0.3;                    // the fall takes this much of a screen of scroll
-const SKY = 1.1;                     // spots this far above the fall still show their drawing in the sky
+// seeded per brick: where it waits, and the stretch of scroll its approach takes.
+// Cai 10-13: three rows sit landed above the bar; a drawing still to come waits out of
+// sight above the top edge, small and faded as in the Codrops depth, and comes toward the
+// reader as the page scrolls up, growing into its spot.
+const FALL = 0.6;                    // the approach takes this much of a screen of scroll
+const ROWS_LANDED = 3;
+let landLine = 0.45;                 // set each frame: the centre of the third row above the bar, as a share of the screen
+let rowPos = [];                     // every row's centre, page coordinates, top to bottom
 function arm(b, i) {
   const r = (n) => seededRandom(hashString(b.item.src) + i * 31 + n);
-  b.B = 0.36 + r(1) * 0.1;           // landed once its spot's centre is this far down the screen (by 46%)
-  b.A = b.B - FALL;                  // starts to fall here
-  b.sky = { dx: (r(2) - 0.5) * 0.5, y: 0.04 + r(3) * 0.2, s: 0.28 + r(4) * 0.14, rot: (r(5) - 0.5) * 16 };
+  b.j = r(1) * 0.04;                 // each brick on its own stretch, so they land one after another
+  b.sky = { dx: (r(2) - 0.5) * 0.6, y: -0.06 - r(3) * 0.14, s: 0.25 + r(4) * 0.15, rot: (r(5) - 0.5) * 12 };
 }
 const seededRandom = (seed) => { const x = Math.sin(seed * 9999) * 10000; return x - Math.floor(x); };
 const hashString = (str) => { let v = 0; for (let i = 0; i < str.length; i++) v = ((v << 5) - v + str.charCodeAt(i)) | 0; return Math.abs(v); };
 
 function measure() {
   const sy = scrollY;
+  rowPos = [...pastEl.querySelectorAll('.wrow')].map((r) => { const b = r.getBoundingClientRect(); return b.top + sy + b.height / 2; });
   for (const b of bricks) {
     const r = b.slot.getBoundingClientRect();
     b.top = r.top + sy; b.cx = r.left + r.width / 2;
@@ -397,12 +400,21 @@ function tick() {
   if (open) return;
   const vh = innerHeight, vw = innerWidth, sy = scrollY;
   if (sy < vh * 1.5) growWall();
+  // three rows stay landed above the bar: find the third row whose centre is above it
+  const barTop = Math.min(vh, $('#dock').getBoundingClientRect().top);
+  let n = 0, line = null;
+  for (let i = rowPos.length - 1; i >= 0; i--) {
+    const c = rowPos[i] - sy;
+    if (c >= barTop) continue;
+    if (++n === ROWS_LANDED) { line = c; break; }
+  }
+  landLine = line == null ? 0.1 : Math.max(0.1, (line - 2) / vh);
   for (const b of bricks) {
     const cy = b.top + b.h / 2 - sy;
-    const target = reduced ? 1 : clamp01((cy - b.A * vh) / (FALL * vh));
-    const sky = reduced ? 1 : clamp01((cy - (b.A - SKY) * vh) / (0.25 * vh));   // fades in high up, far end of the sky
+    const B = landLine - b.j, A = B - FALL;
+    const target = reduced ? 1 : clamp01((cy - A * vh) / (FALL * vh));
     if (cy > vh * 2 && b.drawn === 1 && target === 1) continue;     // landed far below: nothing to do
-    if (sky === 0 && b.drawn === 0) { b.u = 0; continue; }          // not in the sky yet
+    if (target === 0 && b.drawn === 0) { b.u = 0; continue; }       // still out of sight above
     b.u += (target - b.u) * 0.22;
     if (Math.abs(target - b.u) < 0.002) b.u = target;
     const u = b.u;
@@ -410,15 +422,15 @@ function tick() {
       if (b.drawn !== 1) { b.el.style.transform = ''; b.el.style.opacity = ''; b.el.style.visibility = ''; b.el.style.pointerEvents = ''; b.el.classList.remove('flying'); b.drawn = 1; }
       continue;
     }
-    if (sky === 0) { b.el.style.visibility = 'hidden'; b.drawn = 0; continue; }
+    if (u === 0) { b.el.style.visibility = 'hidden'; b.drawn = 0; continue; }
     const e = fall(u), k = 1 - e;
     const skyX = Math.min(vw - 30, Math.max(30, b.cx + b.sky.dx * vw)), skyY = b.sky.y * vh;
     const dx = (skyX - b.cx) * k, dy = (skyY - cy) * k;
     const s = b.sky.s + (1 - b.sky.s) * e;
     if (b.drawn === 1 || b.drawn === 0 || b.drawn === -1) { b.el.style.visibility = ''; b.el.style.pointerEvents = 'none'; b.el.classList.add('flying'); }   // only landed drawings take taps
-    b.el.style.opacity = (u > 0 ? 1 : sky).toFixed(3);
+    b.el.style.opacity = Math.min(1, u / 0.45).toFixed(3);          // faded while far, full as it arrives
     b.el.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) rotate(${(b.sky.rot * k).toFixed(2)}deg) scale(${s.toFixed(3)})`;
-    b.drawn = u + sky * 1e-4;   // never exactly 0 or 1 while in the air
+    b.drawn = u;
   }
   // a day's date shows once its bottom row has landed
   for (const d of days) {
@@ -465,6 +477,22 @@ $('#book').addEventListener('click', (e) => {
   first.focus?.({ preventScroll: true });
 });
 $('#signin').href = SIGN_IN_URL;
+
+// ---------- BI: back to today ----------
+$('#home').addEventListener('click', () => {
+  scrollTo({ top: Math.max(0, Math.round(scrollY + lineOffsetPx())), behavior: reduced ? 'auto' : 'smooth' });
+});
+
+// ---------- About (words from the current site) ----------
+$('#about').addEventListener('click', (e) => {
+  openDialog([
+    h('h2', { class: 'dlg-title', id: 'dlg-title', text: 'Welcome to Basic Inquiry' }),
+    h('p', { class: 'dlg-text', text: 'The Vancouver Life Drawing Society is a not-for-profit, volunteer-run organization focusing on providing high quality life drawing sessions, gallery shows, and educational opportunities to its members. Everyone is welcome, from beginners to seasoned artists!' }),
+    h('p', { class: 'dlg-text', text: 'All sessions are three hours with several breaks. Usually attendance is about 10–20 people, a mix of new and experienced artists. Drawing happens in silence; the breaks are a good time to meet people.' }),
+    h('p', { class: 'dlg-text small' }, h('a', { href: MAPS, text: ADDRESS }), ' · ', h('a', { href: 'tel:+16046812855', text: '604.681.2855' }), ' · ', h('a', { href: 'mailto:board@lifedrawing.org', text: 'board@lifedrawing.org' })),
+    h('p', { class: 'dlg-text small' }, h('a', { href: 'https://www.instagram.com/basicinquiry/', text: 'Instagram' }), ' · ', h('a', { href: 'https://www.facebook.com/basicinquiry', text: 'Facebook' })),
+  ], { returnFocus: e.currentTarget });
+});
 
 // ---------- boot ----------
 async function boot() {
