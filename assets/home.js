@@ -5,13 +5,13 @@
  * The field is the scene of "Infinite Canvas" by Edoardo Lunardi for Codrops
  * (https://tympanus.net/Tutorials/InfiniteCanvas/ , github.com/edoardolunardi/infinite-canvas,
  * MIT licence, (c) Codrops): its three.js camera (fov 60, z 50), fog (120 to 320), depth fade
- * (140 to 260), plane sizes (12 to 20 units), density (5 per 110-unit chunk), seeded layout,
+ * (140 to 260), plane sizes (the demo's 12 to 20 units, scaled up 1.6x on Cai's word), density (5 per 110-unit chunk), seeded layout,
  * fade-in and easing (lerp 0.16), mouse drift. Only the axis changes: page scroll moves the
  * camera up into the past instead of the wheel flying it forward. One cluster per past day.
  *
  * Data: assets/events.json (refresh-calendar.py, today-60 .. today+60 days) and
  * assets/sketchbook.json (demo images: Cai's sketchbook). No bundler; three is vendored and
- * imported on demand, GSAP core (window.gsap) only moves the bar.
+ * imported on demand. The bar rides with the today line (CSS sticky), no script moves it.
  */
 const BOOK_URL = 'https://www.scratchconsortium.com/alain2020/robostrar/';
 const SIGN_IN_URL = BOOK_URL;   // Robostrar member login for now; drawing-club's sign-in later
@@ -272,6 +272,7 @@ const VELOCITY_LERP = 0.16;        // the demo's easing toward a moving target
 const OPACITY_LERP = 0.18;         // its plane fade-in
 const CAMERA_Z = 50, FOV = 60, NEAR = 1, FAR = 500, FOG_NEAR = 120, FOG_FAR = 320;
 const DRIFT = 8.0, DRIFT_LERP = 0.12;   // its mouse drift (desktop only)
+const SIZE_SCALE = 1.6;          // Cai 10-13: bigger drawings than the demo's
 const DEPTH_CHUNKS = 2;            // the demo shows planes up to its render distance of 2 chunks deep
 const seededRandom = (seed) => { const x = Math.sin(seed * 9999) * 10000; return x - Math.floor(x); };
 const hashString = (str) => { let v = 0; for (let i = 0; i < str.length; i++) v = ((v << 5) - v + str.charCodeAt(i)) | 0; return Math.abs(v); };
@@ -322,7 +323,7 @@ function buildPlanes(c) {
   const vw = innerWidth / innerHeight;
   c.planes = c.items.map((it, i) => {
     const s = c.seed + i * 1000, r = (n) => seededRandom(s + n);
-    const size = 12 + r(4) * 8;                                   // the demo's plane size: 12 to 20 units
+    const size = (12 + r(4) * 8) * SIZE_SCALE;                    // the demo's plane size (12 to 20 units), scaled
     // depth: from just in front of the lens to two chunks out, as in the demo. A day's first
     // drawing is anchored at the bottom of its cluster at mid-depth, so the line always has
     // that day's work right above it (on a phone the demo's density spreads a day over two screens).
@@ -478,7 +479,6 @@ if (location.search.includes('debug')) window.__biCaps = () => {
 function frame() {
   requestAnimationFrame(frame);
   const off = lineOffsetPx();
-  const fieldVisible = off > -innerHeight * 0.5;
   cam.ty = off * wpp;
   if (reduced) { cam.x = cam.tx; cam.y = cam.ty; }
   else { cam.x += (cam.tx - cam.x) * VELOCITY_LERP; cam.y += (cam.ty - cam.y) * VELOCITY_LERP; }
@@ -486,7 +486,7 @@ function frame() {
     cam.drift.x += (cam.mouse.x * DRIFT - cam.drift.x) * DRIFT_LERP;
     cam.drift.y += (cam.mouse.y * DRIFT - cam.drift.y) * DRIFT_LERP;
   } else if (cam.touch || reduced) { cam.drift.x *= 0.88; cam.drift.y *= 0.88; }
-  if (!fieldVisible || open) { return; }
+  if (open) return;   // keeps rendering below the line: the upcoming tiles float in the same space
   camera.position.set(cam.x + cam.drift.x, cam.y + cam.drift.y, CAMERA_Z);
 
   // endless: when the camera nears the top of what is built, add the next lap
@@ -581,21 +581,6 @@ function setupPointer(canvas) {
   }, { passive: false });
 }
 
-// ---------- the bar: bottom while you are in the past, top while you are in upcoming ----------
-const bar = $('#bar');
-let barSide = 'bottom';
-function placeBar(force) {
-  const off = lineOffsetPx();
-  const side = off > 40 ? 'bottom' : off < -40 ? 'top' : barSide;
-  if (side === barSide && !force) return;
-  const before = bar.getBoundingClientRect().top;
-  barSide = side;
-  document.body.dataset.bar = side;
-  if (force || reduced || !window.gsap) return;
-  const after = bar.getBoundingClientRect().top;
-  window.gsap.fromTo(bar, { y: before - after }, { y: 0, duration: 0.45, ease: 'power3.inOut', overwrite: true });
-}
-
 // ---------- landing, cues ----------
 let landingY = 0, userMoved = false;
 function centre() {
@@ -604,7 +589,6 @@ function centre() {
 }
 ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((t) => addEventListener(t, () => { userMoved = true; }, { passive: true, once: true }));
 addEventListener('scroll', () => {
-  placeBar(false);
   if (userMoved && Math.abs(scrollY - landingY) > 140) document.body.classList.add('cues-off');
 }, { passive: true });
 
@@ -630,8 +614,7 @@ addEventListener('resize', () => {
 $('#book').addEventListener('click', (e) => {
   e.preventDefault();
   const first = document.querySelector('#upcoming .day-h') || $('#upcoming');
-  const root = getComputedStyle(document.documentElement);
-  const offset = parseFloat(root.getPropertyValue('--bar-h')) + parseFloat(root.getPropertyValue('--today-h')) + 4;
+  const offset = $('#dock').offsetHeight + 4;
   scrollTo({ top: first.getBoundingClientRect().top + scrollY - offset, behavior: reduced ? 'auto' : 'smooth' });
   first.focus?.({ preventScroll: true });
 });
@@ -685,8 +668,7 @@ async function boot() {
   }
 
   centre();
-  placeBar(true);
-  document.fonts?.ready.then(() => { if (!userMoved) { centre(); placeBar(true); } });
+  document.fonts?.ready.then(() => { if (!userMoved) centre(); });
   if (renderer && pastDays.length) {
     cam.y = cam.ty = lineOffsetPx() * wpp;
     requestAnimationFrame(frame);

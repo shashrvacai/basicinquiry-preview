@@ -19,13 +19,6 @@
 <div id="bi-loader" aria-hidden="true"><canvas></canvas></div>
 <script src="assets/bi-loader.js"></script>
 
-<!-- one bar: bottom while you look into the past, top while you read what is coming -->
-<nav class="bar" id="bar" aria-label="Book or sign in">
-  <a class="bar-mark" href="./" aria-label="Basic Inquiry, home"><img src="assets/logo.png" alt="" width="32" height="32"></a>
-  <a class="pill pill-solid" id="book" href="#upcoming">Book a session</a>
-  <a class="pill pill-small" id="signin" href="https://www.scratchconsortium.com/alain2020/robostrar/" title="Opens Robostrar">Sign in</a>
-</nav>
-
 <!-- the past: the demo's 3D field, fixed behind the page; captions ride on top -->
 <div class="field" id="field" aria-hidden="false">
   <div class="field-caps" id="field-caps" aria-label="Past days, newest first"></div>
@@ -43,7 +36,15 @@
     <p class="cue" id="cue-down">Scroll down for upcoming sessions<svg viewBox="0 0 14 22" aria-hidden="true"><path d="M7 1v19M1 14l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></p>
   </div>
 
-  <div class="today ui" id="today" aria-hidden="true"></div>
+  <!-- the today line and the bar, one block in the page: it rides with today and sticks to the top or bottom edge when it reaches one -->
+  <div class="dock" id="dock">
+    <div class="today ui" id="today" aria-hidden="true"></div>
+    <nav class="bar" id="bar" aria-label="Book or sign in">
+      <a class="bar-mark" href="./" aria-label="Basic Inquiry, home"><img src="assets/logo.png" alt="" width="32" height="32"></a>
+      <a class="pill pill-solid" id="book" href="#upcoming">Book a session</a>
+      <a class="pill pill-small" id="signin" href="https://www.scratchconsortium.com/alain2020/robostrar/" title="Opens Robostrar">Sign in</a>
+    </nav>
+  </div>
 
   <section class="upcoming" id="upcoming" aria-label="Upcoming sessions, the next two months">
     <div id="upcoming-list">
@@ -78,7 +79,6 @@
   <p>Book a session on Robostrar, our booking system. 1011 Main Street, Vancouver, BC V6A 4L4. 604.681.2855. board@lifedrawing.org</p>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
   // the sticky "today" line
   (function () {

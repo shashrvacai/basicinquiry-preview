@@ -11,8 +11,6 @@
   --tint: #f0eeec;               /* the 10% brown flattened onto white: image placeholder */
   --font-ui: "DM Sans", system-ui, sans-serif;
   --font-title: "Asul", Georgia, serif;
-  --bar-h: 65px;
-  --today-h: 34px;
   /* poster colours, one per session type */
   --t-regular: #65523c;
   --t-gesture: #2f4858;
@@ -48,12 +46,13 @@ button { font: inherit; color: inherit; }
 .pill-solid { background: var(--ink); color: var(--bg); }
 .pill-solid:hover { background: #2a2a2a; }
 
-/* one bar: bottom while you look into the past, top while you read upcoming (GSAP slides it across) */
-.bar { position: fixed; left: 0; right: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; gap: 10px;
-  padding: 10px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
-  background: rgba(255, 255, 255, .92); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
-body[data-bar="bottom"] .bar, body:not([data-bar]) .bar { bottom: 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--brown-10); }
-body[data-bar="top"] .bar { top: 0; padding-top: calc(10px + env(safe-area-inset-top)); border-bottom: 1px solid var(--brown-10); }
+/* the dock: today line + bar, in the page flow. Sticky to both edges: it rides with today,
+   holds at the top while you read upcoming and at the bottom while you look into the past. */
+.dock { position: sticky; top: 0; bottom: 0; z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(255, 255, 255, .92); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border-top: 1px solid var(--ink); border-bottom: 1px solid var(--brown-10); }
+.bar { display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 4px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left)); }
 .bar-mark { flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; display: block; }
 .bar-mark img { display: block; width: 100%; height: 100%; }
 .bar #book { flex: 0 1 220px; }
@@ -67,7 +66,7 @@ body[data-bar="top"] .bar { top: 0; padding-top: calc(10px + env(safe-area-inset
   color: var(--brown); cursor: pointer; will-change: transform; text-decoration: underline; text-decoration-color: var(--brown-10); text-underline-offset: 4px; }
 .daycap:hover { color: var(--ink); }
 .past { pointer-events: none; }
-main > *:not(.past):not(.today) { position: relative; z-index: 1; }
+main > *:not(.past):not(.dock) { position: relative; z-index: 1; }
 
 /* ---------- the centre line (landing point) ---------- */
 .centre { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 16px 12px; text-align: center; color: var(--brown); }
@@ -77,21 +76,19 @@ main > *:not(.past):not(.today) { position: relative; z-index: 1; }
 body.cues-off .cue { opacity: 0; }
 .note { color: var(--ink); }
 
-/* today: sticks under the top bar while you read upcoming, over the bottom bar while you are in the past */
-.today { position: sticky; top: var(--bar-h); bottom: calc(var(--bar-h) + env(safe-area-inset-bottom)); z-index: 50; height: var(--today-h);
-  display: flex; align-items: center; justify-content: center; gap: .75rem; background: var(--bg);
-  border-top: 1px solid var(--ink); border-bottom: 1px solid var(--brown-10); }
+.today { height: 34px; display: flex; align-items: center; justify-content: center; gap: .75rem; }
 .today b { font-weight: 500; }
 
-/* ---------- upcoming ---------- */
-.upcoming { max-width: none; margin: 0; padding: 0 max(16px, calc((100% - 728px) / 2)) 48px; background: var(--bg); }
-.day-h { position: sticky; top: calc(var(--bar-h) + var(--today-h)); z-index: 40; margin: 0; padding: 14px 0 8px; background: var(--bg);
-  display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--brown-10); }
+/* ---------- upcoming: tiles floating in the same white space, one centred column ---------- */
+.upcoming { padding: 8px 16px 48px; }
+.day { max-width: 400px; margin: 0 auto; }
+.day-h { margin: 0; padding: 40px 0 14px; display: flex; justify-content: center; gap: .6rem; text-align: center; }
 .day-h:focus { outline: none; }
 .day-h b { font-weight: 500; color: var(--ink); }
 .day-h span { color: var(--brown); }
-.sess { display: grid; grid-template-columns: 72px 1fr; column-gap: 14px; row-gap: 0; padding: 16px 0; border-bottom: 1px solid var(--brown-10); }
-.poster { width: 72px; height: 96px; display: flex; flex-direction: column; justify-content: space-between; padding: 8px 7px; color: #fff;
+.sess { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; margin: 0 0 22px; padding: 22px 18px 20px;
+  background: var(--bg); box-shadow: 0 0 10px 0 rgba(0, 0, 0, .1); }
+.poster { width: 72px; height: 96px; display: flex; flex-direction: column; justify-content: space-between; padding: 8px 7px; color: #fff; text-align: left;
   background: var(--t-other); font: 400 13px/1.05 var(--font-title); text-transform: uppercase; overflow: hidden; }
 .poster small { font: 300 9px/1.2 var(--font-ui); letter-spacing: .04em; opacity: .85; }
 .poster.regular { background: var(--t-regular); } .poster.gesture { background: var(--t-gesture); }
@@ -99,23 +96,16 @@ body.cues-off .cue { opacity: 0; }
 .poster.multiday { background: var(--t-multiday); } .poster.elp { background: var(--t-elp); }
 .poster.gallery, .poster.exhibit, .poster.reception { background: var(--tint); color: var(--brown); }
 .sess-t { margin: 0 0 2px; font: 500 16px/1.25 var(--font-ui); }
-.sess-when { margin: 0 0 12px; color: var(--brown); font-size: 14px; }
-.sess-actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px; margin-top: -4px; }
+.sess-when { margin: 0; color: var(--brown); font-size: 14px; }
+.sess-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
 .sess-actions .pill-solid { padding: 0 1.4rem; }
 .sess.plain .sess-t { font-weight: 400; }
 .sess.cancelled .sess-t, .sess.cancelled .sess-when time { text-decoration: line-through; }
 .sess.cancelled .poster { opacity: .4; }
 .cancel-tag { color: var(--ink); font-weight: 500; text-decoration: none; }
-.stale { padding: 24px 0; }
-.foot { background: var(--bg); padding: 8px max(16px, calc((100% - 728px) / 2)) calc(var(--bar-h) + 40px); color: var(--brown); font-size: 13px; }
+.stale { padding: 24px 0; text-align: center; }
+.foot { max-width: 560px; margin: 0 auto; padding: 24px 16px 40px; color: var(--brown); font-size: 13px; text-align: center; }
 .foot p { margin: 0 0 .6rem; }
-
-@media (min-width: 900px) {
-  .sess { grid-template-columns: 96px 1fr auto; align-items: center; }
-  .poster { width: 96px; height: 128px; font-size: 16px; }
-  .sess-when { margin-bottom: 0; }
-  .sess-actions { grid-column: auto; margin-top: 0; justify-content: flex-end; }
-}
 
 /* ---------- dialog (image or session detail) ---------- */
 .dlg { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 64px 16px calc(24px + env(safe-area-inset-bottom)); }
