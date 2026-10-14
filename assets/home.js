@@ -344,10 +344,13 @@ const FALL = 0.6;                    // the approach takes this much of a screen
 const ROWS_LANDED = 3;
 let landLine = 0.45;                 // set each frame: the centre of the third row above the bar, as a share of the screen
 let rowPos = [];                     // every row's centre, page coordinates, top to bottom
+let pitch = 120;                     // average distance between row centres, day gaps included
 function arm(b, i) {
   const r = (n) => seededRandom(hashString(b.item.src) + i * 31 + n);
-  b.j = r(1) * 0.04;                 // each brick on its own stretch, so they land one after another
-  b.sky = { dx: (r(2) - 0.5) * 0.6, y: -0.06 - r(3) * 0.14, s: 0.25 + r(4) * 0.15, rot: (r(5) - 0.5) * 12 };
+  b.j = r(1) * 0.015;                // a hair of stagger, never enough to cross a neighbour
+  // Cai 10-13: no overlap in the air. Each drawing comes straight down its own column from
+  // above the screen, shrunk about its own centre, so neighbours stay side by side.
+  b.sky = { y: -0.12, s: 0.5 };
 }
 const seededRandom = (seed) => { const x = Math.sin(seed * 9999) * 10000; return x - Math.floor(x); };
 const hashString = (str) => { let v = 0; for (let i = 0; i < str.length; i++) v = ((v << 5) - v + str.charCodeAt(i)) | 0; return Math.abs(v); };
@@ -355,6 +358,7 @@ const hashString = (str) => { let v = 0; for (let i = 0; i < str.length; i++) v 
 function measure() {
   const sy = scrollY;
   rowPos = [...pastEl.querySelectorAll('.wrow')].map((r) => { const b = r.getBoundingClientRect(); return b.top + sy + b.height / 2; });
+  if (rowPos.length > 1) pitch = (rowPos[rowPos.length - 1] - rowPos[0]) / (rowPos.length - 1);
   for (const b of bricks) {
     const r = b.slot.getBoundingClientRect();
     b.top = r.top + sy; b.cx = r.left + r.width / 2;
@@ -398,24 +402,19 @@ function growWall() {
 
 function tick() {
   if (open) return;
-  const vh = innerHeight, vw = innerWidth, sy = scrollY;
+  const vh = innerHeight, sy = scrollY;
   if (sy < vh * 1.5) growWall();
-  // three rows stay landed above the bar: find the third row whose centre is above it
+  // three rows stay landed above the bar. The line moves with the bar, never jumps a row at a
+  // time (a jumping line made whole rows snap): the third row's centre, by the average pitch.
   const barTop = Math.min(vh, $('#dock').getBoundingClientRect().top);
-  let n = 0, line = null;
-  for (let i = rowPos.length - 1; i >= 0; i--) {
-    const c = rowPos[i] - sy;
-    if (c >= barTop) continue;
-    if (++n === ROWS_LANDED) { line = c; break; }
-  }
-  landLine = line == null ? 0.1 : Math.max(0.1, (line - 2) / vh);
+  landLine = Math.max(0.1, (barTop - (ROWS_LANDED - 0.5) * pitch) / vh);
   for (const b of bricks) {
     const cy = b.top + b.h / 2 - sy;
     const B = landLine - b.j, A = B - FALL;
     const target = reduced ? 1 : clamp01((cy - A * vh) / (FALL * vh));
     if (cy > vh * 2 && b.drawn === 1 && target === 1) continue;     // landed far below: nothing to do
     if (target === 0 && b.drawn === 0) { b.u = 0; continue; }       // still out of sight above
-    b.u += (target - b.u) * 0.22;
+    b.u += (target - b.u) * 0.18;
     if (Math.abs(target - b.u) < 0.002) b.u = target;
     const u = b.u;
     if (u === 1) {
@@ -424,12 +423,11 @@ function tick() {
     }
     if (u === 0) { b.el.style.visibility = 'hidden'; b.drawn = 0; continue; }
     const e = fall(u), k = 1 - e;
-    const skyX = Math.min(vw - 30, Math.max(30, b.cx + b.sky.dx * vw)), skyY = b.sky.y * vh;
-    const dx = (skyX - b.cx) * k, dy = (skyY - cy) * k;
+    const dy = (b.sky.y * vh - cy) * k;
     const s = b.sky.s + (1 - b.sky.s) * e;
     if (b.drawn === 1 || b.drawn === 0 || b.drawn === -1) { b.el.style.visibility = ''; b.el.style.pointerEvents = 'none'; b.el.classList.add('flying'); }   // only landed drawings take taps
     b.el.style.opacity = Math.min(1, u / 0.45).toFixed(3);          // faded while far, full as it arrives
-    b.el.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) rotate(${(b.sky.rot * k).toFixed(2)}deg) scale(${s.toFixed(3)})`;
+    b.el.style.transform = `translate3d(0, ${dy.toFixed(1)}px, 0) scale(${s.toFixed(3)})`;
     b.drawn = u;
   }
   // a day's date shows once its bottom row has landed
