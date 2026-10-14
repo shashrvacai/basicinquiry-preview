@@ -418,14 +418,14 @@ function tick() {
     if (Math.abs(target - b.u) < 0.002) b.u = target;
     const u = b.u;
     if (u === 1) {
-      if (b.drawn !== 1) { b.el.style.transform = ''; b.el.style.opacity = ''; b.el.style.visibility = ''; b.el.style.pointerEvents = ''; b.el.classList.remove('flying'); b.drawn = 1; }
+      if (b.drawn !== 1) { b.el.style.transform = ''; b.el.style.opacity = ''; b.el.style.visibility = ''; b.el.classList.remove('flying'); b.drawn = 1; }
       continue;
     }
     if (u === 0) { b.el.style.visibility = 'hidden'; b.drawn = 0; continue; }
     const e = fall(u), k = 1 - e;
     const dy = (b.sky.y * vh - cy) * k;
     const s = b.sky.s + (1 - b.sky.s) * e;
-    if (b.drawn === 1 || b.drawn === 0 || b.drawn === -1) { b.el.style.visibility = ''; b.el.style.pointerEvents = 'none'; b.el.classList.add('flying'); }   // only landed drawings take taps
+    if (b.drawn === 1 || b.drawn === 0 || b.drawn === -1) { b.el.style.visibility = ''; b.el.classList.add('flying'); }   // Cai 10-13: a drawing takes a tap in the air too
     b.el.style.opacity = Math.min(1, u / 0.45).toFixed(3);          // faded while far, full as it arrives
     b.el.style.transform = `translate3d(0, ${dy.toFixed(1)}px, 0) scale(${s.toFixed(3)})`;
     b.drawn = u;
